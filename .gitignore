@@ -36,6 +36,9 @@ coverage.xml
 instance/config.py
 .webassets-cache
 
+# Environnement
+*.env
+
 # Fichiers de configuration d'éditeur
 .idea/
 .vscode/
