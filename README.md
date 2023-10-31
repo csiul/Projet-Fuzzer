@@ -16,3 +16,14 @@ flask run
 
 [flask-backbone - GitHub](https://github.com/abstractkitchen/flask-backbone)
 
+## Pour utiliser wpgarlic
+Exeécuter cette commande :
+```bash
+python setup.py
+```
+Ou celles-ci :
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+Cela utilisera la version de `print_findings.py` qui écrit les résultats du fuzzer dans le fichier `output.json`.
