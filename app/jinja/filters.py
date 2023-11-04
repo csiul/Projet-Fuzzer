@@ -8,15 +8,23 @@ https://jinja.palletsprojects.com/en/3.1.x/templates/#list-of-builtin-filters
 from flask import Flask
 
 
-# this is example filter
-# {% for x in mylist | reverse %}
-# {% endfor %}
+
 def reverse_filter(s: list) -> list:
+    """
+    this is example filter
+    {% for x in mylist | reverse %}
+    {% endfor %}
+    """
     return s[::-1]
 
 
 # Add your filters
 def register_filters(app: Flask) -> Flask:
+    """
+    Enregistrement des filtres.
+    :param app: Application Flask
+    :return: Application Flask avec filtres
+    """
     app.jinja_env.filters['reverse']: list = reverse_filter
 
     return app

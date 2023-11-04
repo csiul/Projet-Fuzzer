@@ -6,9 +6,8 @@ Don't forget to import in routes.py:
     init_blueprint_cli(blueprint)
 """
 
-from flask import Blueprint
+# from flask import Blueprint
 
-
-def init_blueprint_cli(blueprint: Blueprint) -> None:
-    # blueprint.cli.add_command(lambda x: x)
-    pass
+# def init_blueprint_cli(blueprint: Blueprint) -> None:
+#     # blueprint.cli.add_command(lambda x: x)
+#     pass
