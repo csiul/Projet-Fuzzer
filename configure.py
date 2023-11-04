@@ -6,7 +6,6 @@ from string import Template
 
 from app.utils import filesystem
 
-
 APP_CONFIG_FILE = "instance/config.py"
 INSTANCE_CONFIG_TEXT = """
 SECRET_KEY = "$secret_key"

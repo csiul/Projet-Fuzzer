@@ -1,3 +1,6 @@
+"""
+Commandes utilitaires pour le développement en Flask.
+"""
 from flask.cli import AppGroup
 
 from app.commands.application.blueprints.create import command_create_blueprint

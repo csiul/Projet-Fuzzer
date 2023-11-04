@@ -1,3 +1,8 @@
+"""
+Utilitaires pour l'application
+[BOILERPLATE]
+"""
+
 import os
 
 from flask import Flask, request, redirect
@@ -17,7 +22,10 @@ from app.commands import init_app_cli
 
 
 def init_configuration(app: Flask) -> None:
-
+    """
+    Initialise les configurations.
+    :param app: Application Flask
+    """
     # Load the default configuration
     app.config.from_object('config.default')
 
@@ -32,6 +40,10 @@ def init_configuration(app: Flask) -> None:
 
 
 def create_app() -> Flask:
+    """
+    Crée l'application Flask.
+    :return: Application Flask configurée
+    """
     app: Flask = Flask(__name__, instance_relative_config=True)
 
     # first, init configurations
@@ -54,11 +66,15 @@ def create_app() -> Flask:
 
     @app.before_request
     def app_before_request():
+        """
+        Traite une requête reçue.
+        """
         request_path: str = request.path
 
         # redirect: example.com/url/ -> example.com/url
         if request_path != '/' and request_path.endswith('/'):
             return redirect(request_path[:-1], 301)
+        return None
 
     register_error_handlers(app)
     blueprints.register_blueprints(app)

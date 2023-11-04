@@ -1,3 +1,7 @@
+"""
+Modèle de base.
+"""
+
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.dialects.postgresql.base import INTEGER
@@ -6,6 +10,10 @@ from app.utils import camel_to_snake
 
 
 def id_column() -> Column:
+    """
+    Génère une colonne ID.
+    :return: Colonne
+    """
     return Column(
         INTEGER,
         autoincrement=True,
@@ -16,10 +24,16 @@ def id_column() -> Column:
 
 
 def int_fk_column(foreign_key) -> Column:
+    """
+    Génère une colonne FK.
+    :param foreign_key: Clé étrangère
+    :return: Colonne
+    """
     return Column(INTEGER, ForeignKey(foreign_key))
 
 
-class _BaseModel(object):
+# pylint: disable=R0903
+class _BaseModel:
     """
     this model will be used as a base for our future models
     you can customize with some boilerplate methods and/or properties
@@ -39,8 +53,9 @@ class _BaseModel(object):
     """
 
     @declared_attr
-    def __tablename__(cls) -> str:
-        return camel_to_snake(cls.__name__).replace('_model', '')
+    def __tablename__(self) -> str:
+        # pylint: disable=E1101
+        return camel_to_snake(self.__name__).replace('_model', '')
 
 
 BaseModel = declarative_base(cls=_BaseModel)
