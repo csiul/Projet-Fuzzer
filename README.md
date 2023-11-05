@@ -11,12 +11,11 @@ python3 configure.py # Pour initialiser les fichiers de configuration
 flask run
 ```
 
-## Usage Dockerfile
+## Usage docker-compose
 Exécuter les commandes suivantes :
 ```bash
 python3 configure.py
-docker image build -t project-fuzzer .
-docker run -p PORT_LOCAL:FLASK_RUN_PORT -d project-fuzzer # où PORT_LOCAL correspond au port local souhaitant être utilisé pour accèder à l'app et où FLASK_RUN_PORT correspond à la valeur de FLASK_RUN_PORT dans le fichier .env
+docker-compose up
 ```
 
 ## Boilerplate
