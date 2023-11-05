@@ -18,6 +18,15 @@ python3 configure.py
 docker-compose up
 ```
 
+Afin de tester le code modifié, exécuter les commandes suivantes :
+```bash
+docker-compose up --build # Reconstruit tous les conteneurs (uniquement web pour l'instant)
+
+# ou
+docker-compose build web # Reconstruit le conteneur web seulement
+docker-compose up
+```
+
 ## Boilerplate
 [Flask-Backbone sur abstractkitchen.com](https://abstractkitchen.com/blog/flask-backbone/)
 
