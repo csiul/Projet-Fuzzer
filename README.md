@@ -6,9 +6,25 @@
 1. Activer venv ou similaire
 2. Exécuter les commandes suivantes :
 ```bash
-pip -r requirements.txt
+pip install -r requirements.txt
 python3 configure.py # Pour initialiser les fichiers de configuration
 flask run
+```
+
+## Usage docker-compose
+Exécuter les commandes suivantes :
+```bash
+python3 configure.py
+docker-compose up
+```
+
+Afin de tester le code modifié, exécuter les commandes suivantes :
+```bash
+docker-compose up --build # Reconstruit tous les conteneurs (uniquement web pour l'instant)
+
+# ou
+docker-compose build web # Reconstruit le conteneur web seulement
+docker-compose up
 ```
 
 ## Boilerplate
