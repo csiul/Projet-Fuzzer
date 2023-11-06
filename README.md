@@ -34,17 +34,8 @@ docker-compose up
 
 Les blueprints **about** et **index_page** sont des exemples provenant du boilerplate, et qui sont exclus de l'analyse de Pylint. 
 
-## Pour utiliser wpgarlic
-Exécuter cette commande :
-```bash
-python setup.py
-```
-Ou celles-ci :
-```bash
-chmod +x setup.sh
-./setup.sh
-```
-Cela utilisera la version de `print_findings.py` qui écrit les résultats du fuzzer dans le fichier `output.json`.
+## Installation de wpgarlic et utilisation
+WPGarlic est installé et automatiquement utilisé par le module `wpfuzzer`, qui offre une couche d'abstraction.
 
 ## Pylint
 Chaque Pull Request ou Push sur `master` déclenche une vérification GitHub Action qui exécute Pylint sur tous les fichiers .py du projet. 
