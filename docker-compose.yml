@@ -1,8 +1,13 @@
-# docker-compose.yaml
 version: '3'
 
 services:
   web:
-    build: '.'
+    build: 'web'
     ports:
       - '5000:5000'
+  api:
+    build: 'api'
+    ports:
+      - '5050:8000'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
