@@ -24,7 +24,11 @@ docker-compose up --build # Reconstruit tous les conteneurs (uniquement web pour
 
 # ou
 docker-compose build web # Reconstruit le conteneur web seulement
+docker-compose build api # Reconstruit le conteneur api seulement
 docker-compose up
+
+# ou
+docker-compose build web && docker-compose up # One-liner
 ```
 
 ## Boilerplate
@@ -53,3 +57,5 @@ Certains fichiers provenant du boilerplate sont également exclus, car le code n
 
 Les codes données par Pylint lors des vérifications (par exemple C0114 pour le message `C0114: Missing module docstring (missing-module-docstring)`)
 peuvent être recherchés sur la [documentation officielle de Pylint](https://pylint.readthedocs.io/en/latest/user_guide/messages/index.html).
+
+> La vérification des imports a été désactivé dû au concept de sous-projets actuellement.

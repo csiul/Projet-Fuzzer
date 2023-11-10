@@ -8,6 +8,6 @@ services:
   api:
     build: 'api'
     ports:
-      - '5050:8000'
+      - '5050:8000' # TODO Retirer l'accès au port et créer un network interne
     volumes:
-      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/var/run/docker.sock:/var/run/docker.sock' # Accès à l'instance Docker

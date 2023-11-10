@@ -12,4 +12,4 @@ RUN pip install -r wpgarlic/requirements.txt
 
 RUN pip install -r requirements.txt
 
-CMD [ "uvicorn", "app:app" , "--reload", "--host", "0.0.0.0"]
+CMD [ "uvicorn", "app:app" , "--host", "0.0.0.0"]

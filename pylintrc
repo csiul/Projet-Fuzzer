@@ -436,7 +436,12 @@ disable=raw-checker-failed,
         use-implicit-booleaness-not-comparison-to-string,
         use-implicit-booleaness-not-comparison-to-zero,
         use-symbolic-message-instead,
-        unnecessary-comprehension
+        unnecessary-comprehension,
+        no-name-in-module,
+        import-error
+# NOTE : no-name-in-module et import-error sont désactivés puisque on a plusieurs projets dans des sous-dossiers,
+# et les imports ne sont pas toujours à partir du root level.
+# Une solution serait d'avoir un pylintrc par sous-projet, et de modifier le CI en conséquence.
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
