@@ -16,7 +16,7 @@ services:
     ports:
       - '3306:3306'
     volumes:
-      - /db:/var/lib/mysql
+      - mysqldata:/var/lib/mysql
     environment:
       - MYSQL_DATABASE=mysql_db
       - MYSQL_ROOT_PASSWORD=dbadmin
@@ -25,4 +25,6 @@ services:
       test: mysql -h localhost --user=root --password=dbadmin -e "SELECT 1;"
       interval: 5s
       timeout: 2s
-      retries: 6
+      retries: 20
+volumes:
+  mysqldata:
