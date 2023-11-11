@@ -14,6 +14,7 @@ jsmin==3.0.1
 lesscpy==0.15.1
 Mako==1.2.4
 MarkupSafe==2.1.1
+pymysql==1.1.0
 ply==3.11
 psycopg2-binary==2.9.3
 python-dotenv==0.20.0

@@ -22,11 +22,11 @@ FLASK_RUN_PORT=$flask_port
 def ask_for_database_uri() -> t.Any:
     click.echo(click.style("> Let's add database support:", fg="green", bold=True))
     click.echo("""
-        Format: postgresql://<user>:<password>@localhost:5432/<db>\n
-        Or leave it empty, if you don't need database support
+        Format: postgresql://<user>:<password>@localhost:5432/<db>
+        Defaults to mysql+pymysql://root:dbadmin@appdb:3306/mysql_db
         """)
 
-    return click.prompt("Database URI", default="")
+    return click.prompt("Database URI", default="mysql+pymysql://root:dbadmin@appdb:3306/mysql_db")
 
 
 def create_instance_config() -> str:

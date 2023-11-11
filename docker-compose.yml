@@ -7,7 +7,7 @@ services:
     ports:
       - '5000:5000'
     environment:
-      - DATABASE_URI=mysql://root:dbadmin@appdb:3306/mysql_db
+      - DATABASE_URI=mysql+pymysql://root:dbadmin@appdb:3306/mysql_db
     depends_on:
       appdb:
         condition: service_healthy
