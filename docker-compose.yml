@@ -3,6 +3,26 @@ version: '3'
 
 services:
   web:
-    build: '.'
+    build: './app/'
     ports:
       - '5000:5000'
+    environment:
+      - DATABASE_URI=mysql://root:dbadmin@appdb:3306/mysql_db
+    depends_on:
+      appdb:
+        condition: service_healthy
+  appdb:
+    build: './db'
+    ports:
+      - '3306:3306'
+    volumes:
+      - /db:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=mysql_db
+      - MYSQL_ROOT_PASSWORD=dbadmin
+    healthcheck:
+      # This is a dummy query. Using a ping or curl will return false positives
+      test: mysql -h localhost --user=root --password=dbadmin -e "SELECT 1;"
+      interval: 5s
+      timeout: 2s
+      retries: 6
