@@ -9,7 +9,7 @@ from fastapi import APIRouter
 
 from jobs.watch_wpgarlic import WatchWPGarlic
 
-router = APIRouter(prefix='/fuzz_plugin')
+router = APIRouter(prefix='/fuzz_plugin', tags=['fuzz_plugin'])
 
 router.wpgarlic_process = None
 

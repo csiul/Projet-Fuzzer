@@ -9,7 +9,7 @@ from fastapi import APIRouter
 
 BASE_URL = "https://api.wordpress.org/plugins/info/1.2/"
 
-router = APIRouter(prefix="/wordpress")
+router = APIRouter(prefix="/wordpress", tags=['wordpress'])
 
 
 @router.get('/plugins')

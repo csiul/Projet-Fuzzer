@@ -7,7 +7,7 @@ from pathlib import Path
 
 from fastapi import APIRouter
 
-router = APIRouter(prefix='/status')
+router = APIRouter(prefix='/status', tags=['status'])
 
 
 def check_if_command_exists(command: [str]) -> bool:
