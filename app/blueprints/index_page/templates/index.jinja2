@@ -7,4 +7,7 @@
   <p></p>
   <p>This value defined in <i>app/jinja/context_processor.py</i>: {{ application_name }}</p>
 
+  <form action="{{ url_for('index.get_plugins')}}">
+    <button type=submit>Get WordPress plugins</button>
+  </form>
 {% endblock %}

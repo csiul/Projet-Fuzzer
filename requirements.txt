@@ -18,6 +18,7 @@ ply==3.11
 psycopg2-binary==2.9.3
 python-dotenv==0.20.0
 rcssmin==1.1.1
+requests
 sentry-sdk==1.16.0
 simple-term-menu==1.5.0
 six==1.16.0
