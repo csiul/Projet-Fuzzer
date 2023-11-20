@@ -13,6 +13,8 @@ router = APIRouter(prefix='/status', tags=['status'])
 def check_if_command_exists(command: [str]) -> bool:
     """
     Vérifie si une commande console existe.
+    ATTENTION, la commande est réellement exécutée, privilégier les commandes pour obtenir des versions,
+    qui n'affectent pas le système.
     :param command: Commande à exécuter, sous forme d'array. Ex. ['ls', '-la']
     :return: Vrai si la commande a pu être exécutée, faux si FileNotFoundError (commande inconnue)
     """
