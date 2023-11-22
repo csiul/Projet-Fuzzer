@@ -246,7 +246,7 @@ def print_findings_from_folder(
     else:
         output_text['summary'] = f"Filepaths with report printed: {num_paths_with_printed_reports} " + f"({100.0 * num_paths_with_printed_reports / len(file_names):.02f}%)"
 
-    with open("output.json", "w") as f:
+    with open("data/output.json", "w") as f:
         json.dump(output_text, f, indent=4)
 
 

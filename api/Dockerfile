@@ -14,4 +14,6 @@ RUN pip install -r requirements.txt
 
 COPY .. .
 
+RUN sh ./wpgarlic_postinstall.sh
+
 CMD [ "uvicorn", "app:app" , "--host", "0.0.0.0"]
