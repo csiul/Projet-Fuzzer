@@ -5,7 +5,7 @@ from math import ceil
 from random import randint
 
 import requests
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 BASE_URL = "https://api.wordpress.org/plugins/info/1.2/"
 
@@ -68,3 +68,21 @@ def get_random_plugin():
     data = response.json()
     plugin = data['plugins'][i - 250 * (page - 1) - 1]
     return plugin
+
+
+@router.get('/check/{plugin_name}')
+def check_if_plugin_exists(plugin_name: str):
+    """
+    Vérifie si un plugin existe sur wordpress.org.
+    :param plugin_name: Nom du plugin à vérifier
+    :return: 404 si le plugin n'existe pas, 200 si trouvé, avec l'objet JSON
+    """
+    params = {
+        "action": "plugin_information",
+        "request[slug]": plugin_name
+    }
+    response = requests.get(BASE_URL, params=params, timeout=30)
+    data = response.json()
+    if data.get('error', '') == 'Plugin not found.':
+        raise HTTPException(status_code=404, detail='Plugin not found on wordpress.org')
+    return data
