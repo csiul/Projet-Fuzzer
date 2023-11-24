@@ -12,12 +12,16 @@ blueprint: Blueprint = Blueprint(
 
 @blueprint.route("/", methods=["get"])
 def index_route() -> Response:
+    plugins = get_plugins()
     return make_response(
         render_template(
             "index.jinja2",
+            plugins=plugins
         )
     )
 
-blueprint.add_url_rule('/get-plugins', view_func=get_plugins)
 
+@blueprint.route("/fuzz-plugin/<slug>", methods=["get"])
+def fuzz_plugin_route(slug) -> Response:
+    pass
 
