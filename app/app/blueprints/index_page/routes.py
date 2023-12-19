@@ -1,6 +1,6 @@
 from flask import Blueprint, make_response, render_template, current_app, Response
 from sqlalchemy import text
-from app.ext.sqlalchemy.database import db_session
+from app.ext.sqlalchemy.database import db
 
 
 blueprint: Blueprint = Blueprint(
@@ -14,13 +14,11 @@ blueprint: Blueprint = Blueprint(
 @blueprint.route("/", methods=["get"])
 def index_route() -> Response:
 
-    result = db_session.execute(text("SELECT 1"))
+    result = db.session.execute(text("SELECT 1"))
     value = result.scalar()
     return make_response(
         render_template(
             "index.jinja2",
-            sqlvalue=value
+            sql_value=value
         )
     )
-
-
