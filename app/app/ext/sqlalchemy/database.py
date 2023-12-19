@@ -7,10 +7,8 @@ https://docs.sqlalchemy.org/en/14/orm/session_basics.html#session-getting
 from flask import Flask
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-
-
-# create empty session for future usage
-db_session: scoped_session = scoped_session(sessionmaker())
+from app.ext.sqlalchemy.model import db
+from flask_sqlalchemy import SQLAlchemy
 
 
 def init_database(app: Flask) -> None:
@@ -18,19 +16,13 @@ def init_database(app: Flask) -> None:
     Initialise la base de données.
     :param app: Application Flask
     """
-    engine: Engine = create_engine(
-        app.config.get("SQLALCHEMY_DATABASE_URI"),
-        echo=app.config.get("SQLALCHEMY_ENGINE_ECHO")
-    )
 
-    db_session.configure(
-        bind=engine,
-        autocommit=app.config.get("SQLALCHEMY_AUTOCOMMIT"),
-        autoflush=app.config.get("SQLALCHEMY_AUTOFLUSH")
-    )
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
 
     @app.teardown_appcontext
-    def shutdown_session() -> None:
+    def shutdown_session(exception) -> None:
 
         # https://docs.sqlalchemy.org/en/14/orm/contextual.html#using-thread-local-scope-with-web-applications
-        db_session.remove()
+        db.session.remove()

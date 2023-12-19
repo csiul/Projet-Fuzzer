@@ -2,9 +2,11 @@
 Modèle de base.
 """
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.dialects.postgresql.base import INTEGER
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from flask_sqlalchemy import SQLAlchemy
 
 from app.utils import camel_to_snake
 
@@ -59,3 +61,23 @@ class _BaseModel:
 
 
 BaseModel = declarative_base(cls=_BaseModel)
+
+db = SQLAlchemy(model_class=BaseModel)
+
+
+class User(db.Model):
+    email = Column(String(256), nullable=False, unique=True, primary_key=True)
+    password = Column(String(256), nullable=False)
+    username = Column(String(64), nullable=False, unique=True)
+    first_name = Column(String(64), nullable=False)
+    last_name = Column(String(64), nullable=False)
+    profile_description = Column(String(64), nullable=True)
+
+    privileges = relationship("Privilege", backref="user")
+
+
+class Privilege(db.Model):
+    email = Column(String, ForeignKey("user.email"), primary_key=True)
+    privilege = Column(String(64), nullable=False, primary_key=True)
+
+    user = relationship("User", backref="privileges")
