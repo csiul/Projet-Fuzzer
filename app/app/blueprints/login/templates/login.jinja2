@@ -1,0 +1,23 @@
+{% extends "layouts/main.jinja2" %}
+
+{% block meta %}
+
+    <meta name="description" content="Page de connexion">
+    <title>Connexion</title>
+
+{% endblock %}
+
+{% block content %}
+
+    <form method="POST" action="/login">
+        <div class="login-form">
+            <h1>Connexion</h1>
+            <label for="email">Adresse email</label>
+            <input type="email" id="email" name="email"  required>
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Se Connecter">
+        </div>
+    </form>
+
+{% endblock %}
