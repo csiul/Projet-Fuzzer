@@ -1,11 +1,13 @@
 """
 Router : Status
 """
-
+import dataclasses
 import subprocess
 from pathlib import Path
+from typing import Dict
 
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter(prefix='/status', tags=['status'])
 
@@ -26,16 +28,24 @@ def check_if_command_exists(command: [str]) -> bool:
     return True
 
 
+@dataclasses.dataclass
+class APIStatus(BaseModel):
+    """
+    Modèle utilisé pour retourner le status de l'API.
+    """
+    checks: Dict[str, bool]
+    result: bool
+
+
 @router.get('/')
 def get_status():
     """
     Obtient le statut actuel de l'API.
     """
-    return {
-        'wpgarlic': {
-            'root': Path('wpgarlic').is_dir(),
-            'exec': Path('wpgarlic/fuzz_plugin.py').is_file()
-        },
+    checks = {
+        'wpgarlic_root': Path('wpgarlic').is_dir(),
+        'wpgarlic_exec': Path('wpgarlic/fuzz_plugin.py').is_file(),
         'docker': check_if_command_exists(['docker', 'version']),
         'docker-compose': check_if_command_exists(['docker-compose', 'version'])
     }
+    return APIStatus(checks=checks, result=all(value for value in checks.values()))
