@@ -19,10 +19,7 @@ def init_database(app: Flask) -> None:
 
     db.init_app(app)
     with app.app_context():
+        db.session.configure(autocommit=app.config.get("SQLALCHEMY_AUTOCOMMIT"),
+                             autoflush=app.config.get("SQLALCHEMY_AUTOFLUSH"))
         db.create_all()
-
-    @app.teardown_appcontext
-    def shutdown_session(exception) -> None:
-
-        # https://docs.sqlalchemy.org/en/14/orm/contextual.html#using-thread-local-scope-with-web-applications
-        db.session.remove()
+        
