@@ -1,0 +1,68 @@
+    {% extends "layouts/main.jinja2" %}
+
+{% block meta %}
+    <meta name="description" content="Page de profil">
+    <title>Page de profil</title>
+{% endblock %}
+
+{% block content %}
+    <h1>Page de profil</h1>
+    <div class="profile">
+        <form method="POST" action="/profile" name="profile_username">
+            <h2>Identifiant utilisateur</h2>
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" name="username" id="username" value="{{ user.username }}" required
+                maxlength="64">
+            <br>
+            <label for="email">Adresse courriel</label>
+            <input type="email" name="email" id="email" value="{{ user.email }}" readonly disabled
+                maxlength="64">
+            <br>
+            <input type="submit" value="Modifier">
+            <input type="hidden" name="form_type" value="update_username">
+            {% if username_error != None %} {{ username_error }} {% endif %}
+        </form>
+
+        <form method="POST" action="/profile" name="profile_password">
+            <h2>Changement de mot de passe</h2>
+            <label for="password">Mot de passe</label>
+            <input type="password" name="password" id="password" required
+                maxlength="32">
+            <br>
+            <label for="new_password">Nouveau mot de passe</label>
+            <input type="password" name="new_password" id="new_password" required
+                maxlength="32">
+            <br>
+            <label for="confirm_password">Confirmation du nouveau mot de passe</label>
+            <input type="password" name="confirm_password" id="confirm_password" required
+                maxlength="32">
+            <br>
+            <input type="submit" value="Modifier">
+            <input type="hidden" name="form_type" value="update_password">
+            {% if password_error != None %} {{ password_error }} {% endif %}
+        </form>
+
+        <form method="POST" action="/profile" name="profile_personal_info">
+            <h2>Informations personnelles</h2>
+            <label for="first_name">Prénom</label>
+            <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}"
+                maxlength="64">
+            <br>
+            <label for="last_name">Nom de famille</label>
+            <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}"
+                maxlength="64">
+            <br>
+            <label for="profile_description">Description de profil</label>
+            <textarea id="profile_description" name="profile_description" rows="6" cols="40"
+                maxlength="512">
+                {%- if user.profile_description != None %}
+                    {{ user.profile_description }}
+                {% endif -%}
+            </textarea>
+            <br>
+            <input type="submit" value="Modifier">
+            <input type="hidden" name="form_type" value="update_personal_info">
+            {% if personal_info_error != None %} {{ personal_info_error }} {% endif %}
+        </form>
+    </div>
+{% endblock %}
