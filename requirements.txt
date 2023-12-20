@@ -1,0 +1,3 @@
+# Utilisé par le CI GitHub pour installer toutes les dépendances.
+-r /api/requirements.txt
+-r /web/requirements.txt
