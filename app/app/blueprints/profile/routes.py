@@ -42,43 +42,39 @@ def profile_route() -> Response:
         Update user data in database based on form_type
         """
         if request.form.get("form_type") == "update_username":
-            user.username = request.form.get("username")
-            user.verified = True  # tell the db that there are changes to commit
             try:
+                user.username = request.form.get("username")
+                user.verified = True  # tell the db that there are changes to commit
                 db.session.commit()
-            except SQLAlchemyError as e:
+            except ValueError as e:
                 db.session.rollback()  # cancel changes
-                form_errors["username_error"] = e
+                form_errors["username_error"] = e.args[0]
 
         elif request.form.get("form_type") == "update_password":
             is_valid_password = user.check_password(request.form.get("password"))
             is_confirmed_password = request.form.get("new_password") == request.form.get("confirm_password")
-            is_strong_password, password_criteria = User.check_password_strength(request.form.get("confirm_password"))
-            if is_valid_password and is_confirmed_password and is_strong_password:
-                user.set_password(request.form.get("confirm_password"))
-                user.verified = True  # tell the db that there are changes to commit
+            if is_valid_password and is_confirmed_password:
                 try:
+                    user.password = request.form.get("confirm_password")
+                    user.verified = True  # tell the db that there are changes to commit
                     db.session.commit()
-                except SQLAlchemyError as e:
+                except ValueError as e:
                     db.session.rollback()  # cancel changes
-                    form_errors["password_error"] = e
-            else:
-                if not is_valid_password:
-                    form_errors["password_error"] = "Mot de passe invalide"
-                elif not is_confirmed_password:
-                    form_errors["password_error"] = "Le nouveau mot de passe et la confirmation ne correspondent pas"
-                elif not is_strong_password:
-                    form_errors["password_error"] = "Votre mot de passe n'est pas assez fort"
+                    form_errors["password_error"] = e.args[0]
+            elif not is_valid_password:
+                form_errors["password_error"] = ("Invalid password",)
+            elif not is_confirmed_password:
+                form_errors["password_error"] = ("Password confirmation does not match",)
 
         elif request.form.get("form_type") == "update_personal_info":
-            user.first_name = request.form.get("first_name")
-            user.last_name = request.form.get("last_name")
-            user.profile_description = request.form.get("profile_description")
-            user.verified = True  # tell the db that there are changes to commit
             try:
+                user.first_name = request.form.get("first_name")
+                user.last_name = request.form.get("last_name")
+                user.profile_description = request.form.get("profile_description")
+                user.verified = True  # tell the db that there are changes to commit
                 db.session.commit()
-            except SQLAlchemyError as e:
+            except ValueError as e:
                 db.session.rollback()  # cancel changes
-                form_errors["personal_info_error"] = e
+                form_errors["personal_info_error"] = e.args[0]
 
     return make_response(render_template("profile.jinja2", user=user, **form_errors))

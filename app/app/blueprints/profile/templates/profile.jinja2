@@ -20,7 +20,13 @@
             <br>
             <input type="submit" value="Modifier">
             <input type="hidden" name="form_type" value="update_username">
-            {% if username_error != None %} {{ username_error }} {% endif %}
+            {% if username_error != None %}
+                <ul>
+                {% for error in username_error  %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
         </form>
 
         <form method="POST" action="/profile" name="profile_password">
@@ -39,7 +45,15 @@
             <br>
             <input type="submit" value="Modifier">
             <input type="hidden" name="form_type" value="update_password">
-            {% if password_error != None %} {{ password_error }} {% endif %}
+
+            {% if password_error != None %}
+                <ul>
+                {% for error in password_error %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+
         </form>
 
         <form method="POST" action="/profile" name="profile_personal_info">
@@ -62,7 +76,13 @@
             <br>
             <input type="submit" value="Modifier">
             <input type="hidden" name="form_type" value="update_personal_info">
-            {% if personal_info_error != None %} {{ personal_info_error }} {% endif %}
+            {% if personal_info_error != None %}
+                <ul>
+                {% for error in personal_info_error %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
         </form>
     </div>
 {% endblock %}

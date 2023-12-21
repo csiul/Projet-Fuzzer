@@ -26,10 +26,12 @@ def init_database(app: Flask) -> None:
         db.drop_all()
         db.create_all()
         # Create admin user for testing purposes
-        user = User(email="admin@admin",
-                    first_name="admin",
-                    last_name="admin",
-                    username="admin")
-        user.set_password("admin")
-        db.session.add(user)
+        admin = User()
+        admin.email = "admin@admin"
+        admin.password = "admin!A1"
+        admin.username = "admin"
+        admin.last_name = "admin"
+        admin.first_name = "admin"
+        admin.verified = True
+        db.session.add(admin)
         db.session.commit()
