@@ -5,7 +5,7 @@ from app.ext.sqlalchemy.database import db
 
 # do not rename "blueprint" variable if you want to use auto import
 blueprint: Blueprint = Blueprint(
-    'login',
+    'auth',
     __name__,
     template_folder='templates'
 )
@@ -29,7 +29,7 @@ def login_route() -> Response:
         is_valid_password = user.check_password(request.form.get("password")) if user is not None else False
         if is_valid_password:
             session["user_email"] = user.email
-            return redirect(url_for("profile.profile_route"))
+            return redirect(url_for("user.profile_route"))
         else:
             return redirect(url_for(".login_route"))
 
@@ -38,9 +38,9 @@ def login_route() -> Response:
         If user is already logged in, redirect to profile page. Otherwise, show login page.
         """
         if "user_email" in session:
-            return redirect(url_for("profile.profile_route"))
+            return redirect(url_for("user.profile_route"))
         else:
-            return make_response(render_template("login.jinja2"))
+            return make_response(render_template("login/login.jinja2"))
 
 
 @blueprint.route("/logout", methods=["GET"])

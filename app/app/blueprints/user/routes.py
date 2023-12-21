@@ -7,7 +7,7 @@ from app.ext.sqlalchemy.database import db
 
 # do not rename "blueprint" variable if you want to use auto import
 blueprint: Blueprint = Blueprint(
-    'profile',
+    'user',
     __name__,
     template_folder='templates'
 )
@@ -16,7 +16,7 @@ blueprint: Blueprint = Blueprint(
 @blueprint.route("/profile", methods=["GET", "POST"])
 def profile_route() -> Response:
     """
-    Secure page to view user profile details. It allows to update username, password and personal info.
+    Secure page to view user user details. It allows to update username, password and personal info.
     :return: Response
     """
 
@@ -77,4 +77,4 @@ def profile_route() -> Response:
                 db.session.rollback()  # cancel changes
                 form_errors["personal_info_error"] = e.args[0]
 
-    return make_response(render_template("profile.jinja2", user=user, **form_errors))
+    return make_response(render_template("profile/profile.jinja2", user=user, **form_errors))
