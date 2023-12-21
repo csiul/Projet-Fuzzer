@@ -1,13 +1,12 @@
 """
 Router : Status
 """
-import dataclasses
+from dataclasses import dataclass
 import subprocess
 from pathlib import Path
 from typing import Dict
 
 from fastapi import APIRouter
-from pydantic import BaseModel
 
 router = APIRouter(prefix='/status', tags=['status'])
 
@@ -28,8 +27,8 @@ def check_if_command_exists(command: [str]) -> bool:
     return True
 
 
-@dataclasses.dataclass
-class APIStatus(BaseModel):
+@dataclass
+class APIStatus:
     """
     Modèle utilisé pour retourner le status de l'API.
     """
