@@ -2,6 +2,8 @@ FROM python:3.9-alpine
 
 WORKDIR /app
 
+COPY ..api/ .
+
 RUN apk add gcc libc-dev linux-headers
 
 # We copy just the requirements.txt first to leverage Docker cache and speed up builds on code changes
