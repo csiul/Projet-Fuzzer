@@ -7,7 +7,7 @@ https://docs.sqlalchemy.org/en/14/orm/session_basics.html#session-getting
 from flask import Flask
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from app.ext.sqlalchemy.model import db, User
+from app.ext.sqlalchemy.model import db, User, Privilege
 
 
 def init_database(app: Flask) -> None:
@@ -32,6 +32,9 @@ def init_database(app: Flask) -> None:
         admin.username = "admin"
         admin.last_name = "admin"
         admin.first_name = "admin"
+        privilege = Privilege()
+        privilege.privilege = "admin"
+        admin.privileges.append(privilege)
         admin.verified = True
         db.session.add(admin)
         db.session.commit()

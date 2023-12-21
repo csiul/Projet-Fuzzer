@@ -1,4 +1,4 @@
-    {% extends "layouts/main.jinja2" %}
+{% extends "layouts/main.jinja2" %}
 
 {% block meta %}
     <meta name="description" content="Page de profil">
@@ -12,7 +12,7 @@
             <h2>Identifiant utilisateur</h2>
             <label for="username">Nom d'utilisateur</label>
             <input type="text" name="username" id="username" value="{{ user.username }}" required
-                maxlength="64">
+                maxlength="32">
             <br>
             <label for="email">Adresse courriel</label>
             <input type="email" name="email" id="email" value="{{ user.email }}" readonly disabled

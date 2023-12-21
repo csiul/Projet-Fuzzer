@@ -112,20 +112,20 @@ class User(db.Model):
         Email setter.
         :param email: email address
         """
-        is_valid_email, criteria = User._validate_email(email)
+        is_valid_email, criteria = User.validate_email(email)
         if is_valid_email:
             self._email = email
         else:
             raise ValueError(criteria)
 
     @classmethod
-    def _validate_email(cls, email: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_email(cls, email: str) -> tuple[bool, tuple[str, ...]]:
         """
         Checks if the email address is valid. Criteria are:
 
         :param email: email address
         :return: tuple with the first element being True if the email address is valid, False otherwise
-            and the second element being a dictionary with the invalid criteria
+            and the second element being a tuple with the invalid criteria
         """
         # TODO: add email validation
         return True, tuple()
@@ -165,7 +165,7 @@ class User(db.Model):
 
         :param password: plain text password
         :return: tuple with the first element being True if the password is strong enough, False otherwise
-            and the second element being a dictionary with the invalid criteria
+            and the second element being a tuple with the invalid criteria
         """
         is_valid = {
             "Le mot de passe doit être entre 8 et 32 caractères":
@@ -220,7 +220,7 @@ class User(db.Model):
 
         :param username: username
         :return: tuple with the first element being True if the username is valid, False otherwise
-            and the second element being a dictionary with the invalid criteria
+            and the second element being a tuple with the invalid criteria
         """
         is_valid = {
             "Le nom d'utilisateur doit être entre 4 et 32 caractères":
@@ -262,7 +262,7 @@ class User(db.Model):
 
         :param first_name: first name
         :return: tuple with the first element being True if the first name is valid, False otherwise
-            and the second element being a dictionary with the invalid criteria
+            and the second element being a tuple with the invalid criteria
         """
         is_valid = {
             "Le prénom doit être entre 1 et 32 caractères":
@@ -302,7 +302,7 @@ class User(db.Model):
 
         :param last_name: last name
         :return: tuple with the first element being True if the last name is valid, False otherwise
-            and the second element being a dictionary with the invalid criteria
+            and the second element being a tuple with the invalid criteria
         """
         is_valid = {
             "Le nom de famille doit être entre 1 et 32 caractères":
@@ -342,13 +342,21 @@ class User(db.Model):
 
         :param profile_description: profile description
         :return: tuple with the first element being True if the profile description is valid, False otherwise
-            and the second element being a dictionary with the invalid criteria
+            and the second element being a tuple with the invalid criteria
         """
         is_valid = {
             "La description du profil doit être entre 0 et 512 caractères ou null":
                 True if 0 <= len(profile_description) <= 512 or profile_description is None else False
         }
         return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
+
+    @hybrid_property
+    def privileges(self) -> relationship:
+        """
+        Privileges getter.
+        :return: relationship with Privilege model
+        """
+        return self._privileges
 
 
 class Privilege(db.Model):
@@ -361,5 +369,63 @@ class Privilege(db.Model):
 
     is related to User model
     """
-    email = Column(ForeignKey("user._email"), primary_key=True)
-    privilege = Column(String(32), nullable=False, primary_key=True)
+    _email = Column(ForeignKey("user._email"), primary_key=True)
+    _privilege = Column(String(32), nullable=False, primary_key=True)
+
+    @hybrid_property
+    def email(self) -> str:
+        """
+        Email getter.
+        :return: email address
+        """
+        return self._email
+
+    @email.setter
+    def email(self, email: str) -> None:
+        """
+        Email setter.
+        :param email: email address
+        """
+        is_valid_email, criteria = User.validate_email(email)
+        if is_valid_email:
+            self._email = email
+        else:
+            raise ValueError(criteria)
+
+    @hybrid_property
+    def privilege(self) -> str:
+        """
+        Privilege getter.
+        :return: privilege
+        """
+        return self._privilege
+
+    @privilege.setter
+    def privilege(self, privilege: str) -> None:
+        """
+        Privilege setter.
+        :param privilege: privilege
+        :raises ValueError: if privilege is not valid
+        """
+        is_valid_privilege, criteria = Privilege._validate_privilege(privilege)
+        if is_valid_privilege:
+            self._privilege = privilege
+        else:
+            raise ValueError(criteria)
+
+    @classmethod
+    def _validate_privilege(cls, privilege: str) -> tuple[bool, tuple[str, ...]]:
+        """
+        Checks if the privilege is valid. Criteria are:
+        - Must be one of the following:
+            - admin
+
+        :param privilege: privilege
+        :return: tuple with the first element being True if the privilege is valid, False otherwise
+            and the second element being a tuple with the invalid criteria
+        """
+        is_valid = {
+            "Le privilège doit être un de: admin":
+                True if privilege in ['admin'] else False
+        }
+        return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)

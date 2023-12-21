@@ -16,12 +16,12 @@ blueprint: Blueprint = Blueprint(
 @blueprint.route("/profile", methods=["GET", "POST"])
 def profile_route() -> Response:
     """
-    Secure page to view user user details. It allows to update username, password and personal info.
+    Secure page to view user details. It allows to update username, password and personal info.
     :return: Response
     """
 
     if "user_email" not in session:  # Logged in verification
-        return redirect(url_for("login.login_route"))
+        return redirect(url_for("auth.login_route"))
 
     # Get session user data from database
     user = db.session.execute(

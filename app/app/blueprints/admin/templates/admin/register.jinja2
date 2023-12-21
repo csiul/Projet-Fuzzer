@@ -1,0 +1,67 @@
+{% extends "layouts/main.jinja2" %}
+
+{% block meta %}
+    <meta name="description" content="Gestion des utilisateurs">
+    <title>Utilisateurs</title>
+{% endblock %}
+
+{% block content %}
+    <h1>Gestion des utilisateurs</h1>
+        <form method="POST" action="/register" name="edit_users">
+            <h2>Modification des utilisateurs</h2>
+            <table>
+                <tr>
+                    <th>Nom d'utilisateur</th>
+                    <th>Courriel</th>
+                    <th>Prénom</th>
+                    <th>Nom de famille</th>
+                    <th>Modifier</th>
+                    <th>Supprimer</th>
+                </tr>
+                {% set counter = 0 %}
+                {% for user in users %}
+                    <tr>
+                        <td><input type="text" name="username_{{ counter }}" id="username_{{ counter }}" value="{{ user.username }}"></td>
+                        <td><input type="text" name="email_{{ counter }}" id="email_{{ counter }}" value="{{ user.email }}"
+                            readonly disabled></td>
+                        <td><input type="text" name="first_name{{ counter }}" id="first_name{{ counter }}" value="{{ user.first_name }}"></td>
+                        <td><input type="text" name="last_name{{ counter }}" id="last_name{{ counter }}" value="{{ user.last_name }}"></td>
+                        <td><input type="button" value="modifier" id="edit_button_{{ counter }}"></td>
+                        <td><input type="button" value="supprimer" id="delete_button{{ counter }}"></td>
+                    </tr>
+                    {% set counter = counter + 1 %}
+                {% endfor %}
+            </table>
+            <input type="hidden" name="form_type" value="edit_user">
+        </form>
+        <h2>Ajout d'un utilisateur</h2>
+        <form method="POST" action="/register" name="add_user">
+            <table>
+                <tr>
+                    <th>Nom d'utilisateur</th>
+                    <th>Courriel</th>
+                    <th>Prénom</th>
+                    <th>Nom de famille</th>
+                    <th>Mot de passe</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td><input type="text" name="username" id="username" maxlength="32" required></td>
+                    <td><input type="email" name="email" id="email" maxlength="64" required></td>
+                    <td><input type="text" name="first_name" id="first_name" maxlength="32" required></td>
+                    <td><input type="text" name="last_name" id="last_name" maxlength="32" required></td>
+                    <td><input type="text" name="password" id="password" placeholder="mot de passe"
+                               maxlength="32" required></td>
+                    <td><input type="submit" value="Ajouter"></td>
+                </tr>
+            </table>
+            {% if add_user_error != None  %}
+                {% for error in add_user_error %}
+                    <ul>
+                    <li>{{ error }}</li>
+                    </ul>
+                {% endfor %}
+            {% endif %}
+            <input type="hidden" name="form_type" value="add_user">
+        </form>
+{% endblock %}
