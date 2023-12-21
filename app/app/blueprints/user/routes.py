@@ -1,6 +1,9 @@
-from flask import (Blueprint, current_app, render_template, Response, make_response, session,
+"""
+This module contains all routes related to user pages and related processes
+"""
+
+from flask import (Blueprint, render_template, Response, make_response, session,
                    redirect, url_for, request)
-from sqlalchemy.exc import SQLAlchemyError
 from app.ext.sqlalchemy.model import User
 from app.ext.sqlalchemy.database import db
 
@@ -38,9 +41,7 @@ def profile_route() -> Response:
     }
 
     if request.method == "POST":
-        """
-        Update user data in database based on form_type
-        """
+        # Update user data in database based on form_type
         if request.form.get("form_type") == "update_username":
             try:
                 user.username = request.form.get("username")

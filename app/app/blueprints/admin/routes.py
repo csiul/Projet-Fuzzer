@@ -1,4 +1,8 @@
-from flask import Blueprint, current_app, render_template, Response, make_response, \
+"""
+This module contains all routes related to admin pages and related processes
+"""
+
+from flask import Blueprint, render_template, Response, make_response, \
     session, request, redirect, url_for
 from sqlalchemy import and_
 from app.ext.sqlalchemy.model import User, Privilege

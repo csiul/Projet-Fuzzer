@@ -2,15 +2,14 @@
 Modèle de base.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer, String, CheckConstraint
+from string import capwords
+from sqlalchemy import Column, ForeignKey, String, CheckConstraint
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql.base import INTEGER
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-import re
-from string import capwords
 
 from app.utils import camel_to_snake
 
@@ -169,15 +168,15 @@ class User(db.Model):
         """
         is_valid = {
             "Le mot de passe doit être entre 8 et 32 caractères":
-                True if 8 <= len(password) <= 32 else False,
+                bool(8 <= len(password) <= 32),
             "Le mot de passe doit contenir au moins 1 lettre minuscule":
-                True if any(char.islower() for char in password) else False,
+                bool(any(char.islower() for char in password)),
             "Le mot de passe doit contenir au moins 1 lettre majuscule":
-                True if any(char.isupper() for char in password) else False,
+                bool(any(char.isupper() for char in password)),
             "Le mot de passe doit contenir au moins 1 chiffre":
-                True if any(char.isdigit() for char in password) else False,
+                bool(any(char.isdigit() for char in password)),
             "Le mot de passe doit contenir au moins 1 caractère spécial":
-                True if any(not char.isalnum() for char in password) else False
+                bool(any(not char.isalnum() for char in password))
         }
         return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
 
@@ -224,11 +223,11 @@ class User(db.Model):
         """
         is_valid = {
             "Le nom d'utilisateur doit être entre 4 et 32 caractères":
-                True if 4 <= len(username) <= 32 else False,
+                bool(4 <= len(username) <= 32),
             "Le nom d'utilisateur doit commencer par 2 lettres":
-                True if username[:2].isalpha() else False,
+                bool(username[:2].isalpha()),
             "Le nom d'utilisateur ne doit contenir que des caractères alphanumériques":
-                True if username.isalnum() else False
+                bool(username.isalnum())
         }
         return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
 
@@ -266,9 +265,9 @@ class User(db.Model):
         """
         is_valid = {
             "Le prénom doit être entre 1 et 32 caractères":
-                True if 1 <= len(first_name) <= 32 else False,
+                bool(1 <= len(first_name) <= 32),
             "Le prénom ne doit contenir que des caractères alphabétiques":
-                True if first_name.isalpha() else False
+                bool(first_name.isalpha())
         }
         return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
 
@@ -306,9 +305,9 @@ class User(db.Model):
         """
         is_valid = {
             "Le nom de famille doit être entre 1 et 32 caractères":
-                True if 1 <= len(last_name) <= 32 else False,
+                bool(1 <= len(last_name) <= 32),
             "Le nom de famille ne doit contenir que des caractères alphabétiques":
-                True if last_name.isalpha() else False
+                bool(last_name.isalpha())
         }
         return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
 
@@ -346,7 +345,7 @@ class User(db.Model):
         """
         is_valid = {
             "La description du profil doit être entre 0 et 512 caractères ou null":
-                True if 0 <= len(profile_description) <= 512 or profile_description is None else False
+                bool(0 <= len(profile_description) <= 512 or profile_description is None)
         }
         return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
 
@@ -426,6 +425,6 @@ class Privilege(db.Model):
         """
         is_valid = {
             "Le privilège doit être un de: admin":
-                True if privilege in ['admin'] else False
+                bool(privilege in ['admin'])
         }
         return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
