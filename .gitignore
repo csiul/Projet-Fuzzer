@@ -33,7 +33,7 @@ coverage.xml
 .pytest_cache/
 
 # Flask stuff:
-*/instance/config.py
+web/instance/config.py
 .webassets-cache
 
 # Environnement

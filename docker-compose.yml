@@ -1,9 +1,8 @@
-# docker-compose.yaml
 version: '3'
 
 services:
   web:
-    build: './app/'
+    build: 'web'
     ports:
       - '5000:5000'
     environment:
@@ -11,6 +10,12 @@ services:
     depends_on:
       appdb:
         condition: service_healthy
+  api:
+    build: 'api'
+    ports:
+      - '5050:8000' # TODO Retirer l'accès au port et créer un network interne
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock' # Accès à l'instance Docker
   appdb:
     build: './db'
     ports:
