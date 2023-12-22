@@ -55,7 +55,6 @@ def register_route() -> Response:
                 db.session.rollback()
                 form_errors["add_user_error"] = e.args[0]
         elif request.form.get("form_type") == "edit_user":
-            # TODO
             pass
 
     users = db.session.execute(

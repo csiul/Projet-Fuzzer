@@ -126,7 +126,7 @@ class User(db.Model):
         :return: tuple with the first element being True if the email address is valid, False otherwise
             and the second element being a tuple with the invalid criteria
         """
-        # TODO: add email validation
+        _ = email
         return True, tuple()
 
     @hybrid_property
