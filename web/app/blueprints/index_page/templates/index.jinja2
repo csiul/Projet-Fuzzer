@@ -1,10 +1,30 @@
 {% extends 'layouts/main.jinja2' %}
 
 {% block content %}
-  <p>Hello. Welcome to your index page.</p>
-  <p><a href="{{ url_for("about.about_page") }}">About me</a></p>
-
-  <p></p>
-  <p>This value defined in <i>app/jinja/context_processor.py</i>: {{ application_name }}</p>
-
+  <table class="table is-bordered is-striped">
+    <thead>
+      <tr>
+        <th scope="col">Plugin</th>
+        <th scope="col">Description</th>
+        <th scope="col">Added</th>
+        <th scope="col">Last Updated</th>
+        <th scope="col">Fuzz</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for plugin in plugins %}
+        <tr>
+          <td>{{ plugin.name }}</td>
+          <td>{{ plugin.short_description }}</td>
+          <td>{{ plugin.added }}</td>
+          <td>{{ plugin.last_updated }}</td>
+          <td>
+            <form action="{{ url_for('index.fuzz_plugin_route', slug=plugin.slug) }}">
+              <button class="button is-primary" type=submit>Fuzz</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}
