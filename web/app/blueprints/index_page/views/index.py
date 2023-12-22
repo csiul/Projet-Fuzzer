@@ -1,8 +1,9 @@
 # Module for getting the list of plugins from the WordPress API
 import requests
 
-
-# Get the list of plugins from the WordPress API
+"""
+Get the list of plugins from the WordPress API
+"""
 def get_plugins():
     base_url = 'https://api.wordpress.org/plugins/info/1.1/'
     r = requests.get(

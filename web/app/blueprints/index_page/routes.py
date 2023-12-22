@@ -9,7 +9,9 @@ blueprint: Blueprint = Blueprint(
     static_folder='static'
 )
 
-
+"""
+Display the index page with the list of plugins
+"""
 @blueprint.route("/", methods=["get"])
 def index_route() -> Response:
     plugins = get_plugins()
