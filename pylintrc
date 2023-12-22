@@ -53,11 +53,11 @@ ignore= print_findings.py,
 # ignore-list. The regex matches against paths and can be in Posix or Windows
 # format. Because '\\' represents the directory delimiter on Windows systems,
 # it can't be used as an escape character.
-ignore-paths=   config/*,
-                app/blueprints/__boilerplate__/*,
-                app/commands/application/blueprints/*,
-                app/blueprints/about/*,
-                app/blueprints/index_page/*
+ignore-paths=   web/config/*,
+                web/app/blueprints/__boilerplate__/*,
+                web/app/commands/application/blueprints/*,
+                web/app/blueprints/about/*,
+                web/app/blueprints/index_page/*
 
 # Files or directories matching the regular expression patterns are skipped.
 # The regex matches against base names, not paths. The default value ignores
@@ -436,7 +436,12 @@ disable=raw-checker-failed,
         use-implicit-booleaness-not-comparison-to-string,
         use-implicit-booleaness-not-comparison-to-zero,
         use-symbolic-message-instead,
-        unnecessary-comprehension
+        unnecessary-comprehension,
+        no-name-in-module,
+        import-error
+# NOTE : no-name-in-module et import-error sont désactivés puisque on a plusieurs projets dans des sous-dossiers,
+# et les imports ne sont pas toujours à partir du root level.
+# Une solution serait d'avoir un pylintrc par sous-projet, et de modifier le CI en conséquence.
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
