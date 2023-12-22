@@ -9,11 +9,13 @@ blueprint: Blueprint = Blueprint(
     static_folder='static'
 )
 
-"""
-Display the index page with the list of plugins
-"""
+
 @blueprint.route("/", methods=["get"])
 def index_route() -> Response:
+    """
+    Display the index page with the list of plugins
+    :return: Index page with plugins
+    """
     plugins = get_plugins()
     return make_response(
         render_template(
@@ -25,5 +27,8 @@ def index_route() -> Response:
 
 @blueprint.route("/fuzz-plugin/<slug>", methods=["get"])
 def fuzz_plugin_route(slug) -> Response:
+    """
+    Fuzz a plugin (the function does nothing because it needs to be implemented with the API)
+    :param slug: Plugin slug
+    """
     pass
-
