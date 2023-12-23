@@ -1,5 +1,7 @@
-from flask import Blueprint, make_response, render_template, current_app, Response
-
+"""
+Routes liées à la page d'accueil
+"""
+from flask import Blueprint, make_response, render_template, Response
 from app.blueprints.index_page.views.index import get_plugins
 
 blueprint: Blueprint = Blueprint(
@@ -25,6 +27,7 @@ def index_route() -> Response:
     )
 
 
+# pylint: disable=unused-argument, unnecessary-pass
 @blueprint.route("/fuzz-plugin/<slug>", methods=["get"])
 def fuzz_plugin_route(slug) -> Response:
     """

@@ -1,4 +1,6 @@
-# Module for getting the list of plugins from the WordPress API
+"""
+Module for getting the list of plugins from the WordPress API
+"""
 import requests
 
 
