@@ -20,6 +20,8 @@ from app.ext.cache import cache
 
 from app.commands import init_app_cli
 
+import urllib.parse
+
 
 def init_configuration(app: Flask) -> None:
     """
@@ -50,6 +52,12 @@ def create_app() -> Flask:
     init_configuration(app)
 
     init_sentry(app)
+
+    with open("/run/secrets/db_password") as f:
+        db_user = "web"
+        db_password = f.readline()
+        app.config["SQLALCHEMY_DATABASE_URI"] = \
+            f"mysql+pymysql://{db_user}:{urllib.parse.quote(db_password)}@db:3306/mysql_db"
 
     if len(app.config.get("SQLALCHEMY_DATABASE_URI")):
         init_database(app)

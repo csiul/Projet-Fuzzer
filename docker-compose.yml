@@ -6,37 +6,64 @@ services:
     ports:
       - '5000:5000'
     environment:
-      - DATABASE_URI=mysql+pymysql://root:dbadmin@appdb:3306/mysql_db
+      - DATABASE_URI=mysql+pymysql://web:db_password@db:3306/mysql_db
     depends_on:
-      appdb:
+      db:
         condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    secrets:
+      - db_password
   api:
     build: 'api'
-    ports:
-      - '5050:8000' # TODO Retirer l'accès au port et créer un network interne
+    networks:
+      - backend
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock' # Accès à l'instance Docker
-  appdb:
-    build: './db'
-    ports:
-      - '3306:3306'
+  db:
+    image: mysql:8.0.35-debian
     volumes:
       - mysqldata:/var/lib/mysql
     environment:
       - MYSQL_DATABASE=mysql_db
-      - MYSQL_ROOT_PASSWORD=dbadmin
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
+      - MYSQL_USER=web
+      - MYSQL_PASSWORD_FILE=/run/secrets/db_password
+    networks:
+      - backend
+    secrets:
+      - db_root_password
+      - db_password
     healthcheck:
       # This is a dummy query. Using a ping or curl will return false positives
-      test: mysql -h localhost --user=root --password=dbadmin -e "SELECT 1;"
+      test: mysql -h localhost --user=root --password="$(cat /run/secrets/db_root_password)" -e "SELECT 1;"
       interval: 5s
       timeout: 2s
-      retries: 20
+      retries: 4
   phpmyadmin:
     image: phpmyadmin
     restart: always
     ports:
       - '8080:80'
     environment:
-      - PMA_ARBITRARY=1
+      - PMA_PORT:3306
+      - PMA_HOST:db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+
 volumes:
   mysqldata:
+
+networks:
+  frontend:
+  backend:
+
+secrets:
+  db_password:
+    file: .secrets/db_password.txt
+  db_root_password:
+    file: .secrets/db_root_password.txt

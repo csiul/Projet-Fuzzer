@@ -1,41 +1,48 @@
 import typing as t
 import secrets
 import click
+import os
+import string
 
 from string import Template
 
-from app.utils import filesystem
+from web.app.utils import filesystem
 
-APP_CONFIG_FILE = "instance/config.py"
+APP_CONFIG_FILE = "web/instance/config.py"
 INSTANCE_CONFIG_TEXT = """
 SECRET_KEY = "$secret_key"
 SQLALCHEMY_DATABASE_URI = "$sqlalchemy_database_uri"
 """
 
+DOT_ENV_FILE = "web/"
 DOT_ENV_TEXT = """
 FLASK_DEBUG=1
 APP_CONFIG=$flask_env
 FLASK_RUN_PORT=$flask_port
 """
 
+SECRETS_FOLDER = ".secrets/"
+DB_ROOT_PASSWORD_FILE = "db_root_password.txt"
+DB_PASSWORD_FILE = "db_password.txt"
+
 
 def ask_for_database_uri() -> t.Any:
     click.echo(click.style("> Let's add database support:", fg="green", bold=True))
     click.echo("""
         Format: postgresql://<user>:<password>@localhost:5432/<db>
-        Defaults to mysql+pymysql://root:dbadmin@appdb:3306/mysql_db
+        Defaults to mysql+pymysql://root:dbadmin@db:3306/mysql_db
         """)
 
-    return click.prompt("Database URI", default="mysql+pymysql://root:dbadmin@appdb:3306/mysql_db")
+    return click.prompt("Database URI", default="mysql+pymysql://root:dbadmin@db:3306/mysql_db")
 
 
-def create_instance_config() -> str:
+def create_instance_config():
     secret_key: str = secrets.token_hex()
-    sqlalchemy_database_uri: t.Any = ask_for_database_uri()
+    # sqlalchemy_database_uri: t.Any = ask_for_database_uri()
 
     variables: dict = {
         "secret_key": secret_key,
-        "sqlalchemy_database_uri": sqlalchemy_database_uri
+        "sqlalchemy_database_uri": ""
     }
 
     filesystem.set_file(
@@ -45,7 +52,25 @@ def create_instance_config() -> str:
 
     click.echo(click.style("[x] %s created." % APP_CONFIG_FILE, fg="green", bold=True))
 
-    return sqlalchemy_database_uri
+
+def generate_random_password(length: int = 20) -> str:
+    alphabet = string.ascii_letters + string.digits + string.punctuation
+    password = ""
+    for i in range(length):
+        password += secrets.choice(alphabet)
+    return password
+
+
+def create_docker_secrets() -> None:
+    filesystem.create_folder_if_not(SECRETS_FOLDER)
+
+    # web db user password
+    filesystem.set_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}", generate_random_password(32))
+    click.echo(click.style("[x] created db user password for web container", fg="green", bold=True))
+
+    # db root password
+    filesystem.set_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}", generate_random_password(32))
+    click.echo(click.style("[x] created root password for db", fg="green", bold=True))
 
 
 def create_dot_env() -> None:
@@ -53,7 +78,7 @@ def create_dot_env() -> None:
 
     if flask_env != "production":
         flask_port: str = click.prompt("FLASK_RUN_PORT", default="5000")
-        filesystem.set_file(".env", Template(DOT_ENV_TEXT).substitute({
+        filesystem.set_file(f"{DOT_ENV_FILE}.env", Template(DOT_ENV_TEXT).substitute({
             "flask_env": flask_env,
             "flask_port": flask_port
         }))
@@ -78,6 +103,10 @@ def init_config() -> None:
         click.echo("Looks like you already have .env")
     else:
         create_dot_env()
+
+    # docker secrets
+    click.echo(click.style("*** Now creating necessary docker secrets ***", fg="green", bold=True))
+    create_docker_secrets()
 
     click.echo(click.style("All done. Now you can use 'flask run'", fg="green", bold=True))
 
