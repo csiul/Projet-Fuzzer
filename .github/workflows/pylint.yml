@@ -39,4 +39,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check all files for newline using linelint
-        uses: actions/linelint@master
+        uses: fernandrone/linelint@0.0.4
