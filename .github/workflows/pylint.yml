@@ -39,4 +39,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check all files for newline
-        run: git ls-files | xargs -L1 bash -c 'test "$(tail -c1 "$0")" && echo "No newline at end of $0" && exit 1'
+        run: git ls-files | xargs -L1 bash -c 'test "$(tail -c1 "$0")" && { echo "No newline at end of $0"; exit 1; } || exit 0'
