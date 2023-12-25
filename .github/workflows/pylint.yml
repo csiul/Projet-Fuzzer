@@ -1,4 +1,4 @@
-name: Pylint
+name: Linter
 
 on:
   workflow_dispatch:
@@ -33,3 +33,10 @@ jobs:
     - name: Analysing the code with pylint on ${{ matrix.folder }}
       run: |
         pylint $(find . -name '*.py')
+  linelint:
+    runs-on: ubuntu-latest
+    name: All files end with newline
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check all files for newline using linelint
+        uses: actions/linelint@master
