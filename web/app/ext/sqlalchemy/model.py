@@ -12,6 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.utils import camel_to_snake
+import re
 
 
 def id_column() -> Column:
@@ -75,7 +76,8 @@ class User(db.Model):
 
     Also provides methods to hash, check passwords and verify password strength.
 
-    email: email address of the user and primary key. Domain must be @ulaval.ca
+    uid: user id and primary key. Automatically generated
+    email: email address of the user. Must be unique and follow the ULaval email address format
     password: password of the user. Must be hashed using set_password() method
     username: username of the user. Must be unique, alphanumeric, start with 2 letters
         and between 4 and 32 characters long
@@ -84,7 +86,10 @@ class User(db.Model):
     profile_description: description of the user's profile. Must be between 0 and 512 characters long
     """
 
-    _email = Column(String(64), nullable=False, unique=True, primary_key=True)
+    _uid = id_column()
+    _email = Column(String(64),
+                    CheckConstraint("REGEXP_LIKE(_email, '^([a-z[-] ])+[.]([a-z[-] ])+([.][0-9]*)?@ulaval[.]ca$')"),
+                    nullable=True, unique=True)
     _password = Column(String(102), nullable=False)
     _username = Column(String(32),
                        CheckConstraint("REGEXP_LIKE(_username, '^([a-zA-Z]{2}([a-zA-Z]|[0-9]){2}([a-zA-Z]|[0-9])*)$')"),
@@ -96,6 +101,38 @@ class User(db.Model):
     _profile_description = Column(String(512), nullable=True)
 
     _privileges = relationship("Privilege", backref="user")
+
+    def __init__(self, password: str = None, username: str = None, first_name: str = None,
+                 last_name: str = None, email: str = None, profile_description: str = None) -> None:
+        """
+        Constructor.
+        :param email: email address of the user
+        :param password: password of the user
+        :param username: username of the user
+        :param first_name: first name of the user
+        :param last_name: last name of the user
+        :param profile_description: profile description of the user
+        """
+        if email is not None:
+            self.email = email
+        if password is not None:
+            self.password = password
+        if username is not None:
+            self.username = username
+        if first_name is not None:
+            self.first_name = first_name
+        if last_name is not None:
+            self.last_name = last_name
+        if profile_description is not None:
+            self.profile_description = profile_description
+
+    @hybrid_property
+    def uid(self) -> int:
+        """
+        UID getter.
+        :return: UID of the user
+        """
+        return self._uid
 
     @hybrid_property
     def email(self) -> str:
@@ -122,12 +159,15 @@ class User(db.Model):
         """
         Checks if the email address is valid. Criteria are:
 
-        :param email: email address
+        :param email: email address. Must follow the ULaval email address format
         :return: tuple with the first element being True if the email address is valid, False otherwise
             and the second element being a tuple with the invalid criteria
         """
-        _ = email
-        return True, tuple()
+        is_valid = {
+            "L'adresse courriel doit respecter le format de l'université Laval":
+                bool(re.match(r'^([a-z\- ])+\.([a-z\- ])+(\.[0-9]*)?@ulaval\.ca$', email) is not None)
+        }
+        return all(is_valid.keys()), tuple(key for key, value in is_valid.items() if not value)
 
     @hybrid_property
     def password(self) -> str:
@@ -145,6 +185,10 @@ class User(db.Model):
         :return: None
         :raises ValueError: if password is not strong enough
         """
+        # password is hashed
+        if len(password) == 102:
+            self._password = password
+            return
         is_strong_password, criteria = User._check_password_strength(password)
         if is_strong_password:
             self._password = generate_password_hash(password)
@@ -368,28 +412,35 @@ class Privilege(db.Model):
 
     is related to User model
     """
-    _email = Column(ForeignKey("user._email"), primary_key=True)
+    _uid = Column(ForeignKey("user._uid"), primary_key=True)
     _privilege = Column(String(32), nullable=False, primary_key=True)
 
-    @hybrid_property
-    def email(self) -> str:
+    def __init__(self, uid: int = None, privilege: str = None) -> None:
         """
-        Email getter.
-        :return: email address
+        Constructor.
+        :param uid: uid of the user
+        :param privilege: privilege of the user
         """
-        return self._email
+        if uid is not None:
+            self.uid = uid
+        if privilege is not None:
+            self.privilege = privilege
 
-    @email.setter
-    def email(self, email: str) -> None:
+    @hybrid_property
+    def uid(self) -> int:
         """
-        Email setter.
-        :param email: email address
+        UID getter.
+        :return: UID of the user
         """
-        is_valid_email, criteria = User.validate_email(email)
-        if is_valid_email:
-            self._email = email
-        else:
-            raise ValueError(criteria)
+        return self._uid
+
+    @uid.setter
+    def uid(self, uid: int) -> None:
+        """
+        UID setter.
+        :param uid: uid of the user
+        """
+        self._uid = uid
 
     @hybrid_property
     def privilege(self) -> str:

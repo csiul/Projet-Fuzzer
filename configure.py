@@ -1,8 +1,9 @@
 import typing as t
 import secrets
 import click
-import os
 import string
+import json
+from web.app.ext.sqlalchemy.model import User
 
 from string import Template
 
@@ -26,19 +27,8 @@ DB_ROOT_PASSWORD_FILE = "db_root_password.txt"
 DB_PASSWORD_FILE = "db_password.txt"
 
 
-def ask_for_database_uri() -> t.Any:
-    click.echo(click.style("> Let's add database support:", fg="green", bold=True))
-    click.echo("""
-        Format: postgresql://<user>:<password>@localhost:5432/<db>
-        Defaults to mysql+pymysql://root:dbadmin@db:3306/mysql_db
-        """)
-
-    return click.prompt("Database URI", default="mysql+pymysql://root:dbadmin@db:3306/mysql_db")
-
-
 def create_instance_config():
     secret_key: str = secrets.token_hex()
-    # sqlalchemy_database_uri: t.Any = ask_for_database_uri()
 
     variables: dict = {
         "secret_key": secret_key,
@@ -54,7 +44,8 @@ def create_instance_config():
 
 
 def generate_random_password(length: int = 20) -> str:
-    alphabet = string.ascii_letters + string.digits + string.punctuation
+    alphabet = (string.ascii_letters + string.digits + string.punctuation
+                .replace("'", "").replace('"', ""))
     password = ""
     for i in range(length):
         password += secrets.choice(alphabet)
@@ -64,13 +55,19 @@ def generate_random_password(length: int = 20) -> str:
 def create_docker_secrets() -> None:
     filesystem.create_folder_if_not(SECRETS_FOLDER)
 
-    # web db user password
-    filesystem.set_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}", generate_random_password(32))
-    click.echo(click.style("[x] created db user password for web container", fg="green", bold=True))
+    if filesystem.has_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}"):
+        click.echo("Looks like you already have %s" % DB_PASSWORD_FILE)
+    else:
+        # web db user password
+        filesystem.set_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}", generate_random_password(32))
+        click.echo(click.style("[x] created db user password for web container", fg="green", bold=True))
 
-    # db root password
-    filesystem.set_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}", generate_random_password(32))
-    click.echo(click.style("[x] created root password for db", fg="green", bold=True))
+    if filesystem.has_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}"):
+        click.echo("Looks like you already have %s" % DB_ROOT_PASSWORD_FILE)
+    else:
+        # db root password
+        filesystem.set_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}", generate_random_password(32))
+        click.echo(click.style("[x] created root password for db", fg="green", bold=True))
 
 
 def create_dot_env() -> None:
@@ -86,6 +83,35 @@ def create_dot_env() -> None:
 
     else:
         click.echo(click.style("[] .env ignored.", fg="green", bold=True))
+
+
+def create_app_admin() -> None:
+    admin = User()
+    admin_arguments = ["username", "email", "password", "first_name", "last_name"]
+
+    for arg in admin_arguments:
+        is_valid_arg = False
+        while not is_valid_arg:
+            try:
+                if arg == "email":
+                    user_input = click.prompt(f"Enter the admin {arg}", default="")
+                else:
+                    user_input = click.prompt(f"Enter the admin {arg}")
+                if user_input != "":
+                    admin.__setattr__(arg, user_input)
+            except ValueError as e:
+                for error in e.args[0]:
+                    click.echo(click.style(error, fg="red", bold=True))
+            else:
+                is_valid_arg = True
+    admin_info = {
+        "username": admin.username,
+        "email": admin.email,
+        "password": admin.password,
+        "first_name": admin.first_name,
+        "last_name": admin.last_name,
+    }
+    filesystem.set_file(f"{SECRETS_FOLDER}admin.json", json.dumps(admin_info))
 
 
 @click.command()
@@ -108,8 +134,9 @@ def init_config() -> None:
     click.echo(click.style("*** Now creating necessary docker secrets ***", fg="green", bold=True))
     create_docker_secrets()
 
-    click.echo(click.style("All done. Now you can use 'flask run'", fg="green", bold=True))
+    create_app_admin()
 
+    click.echo(click.style("All done. Now you can use 'flask run'", fg="green", bold=True))
 
 if __name__ == '__main__':
     init_config()

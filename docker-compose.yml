@@ -15,6 +15,7 @@ services:
       - backend
     secrets:
       - db_password
+      - app_admin
   api:
     build: 'api'
     networks:
@@ -67,3 +68,5 @@ secrets:
     file: .secrets/db_password.txt
   db_root_password:
     file: .secrets/db_root_password.txt
+  app_admin:
+    file: .secrets/admin.json
