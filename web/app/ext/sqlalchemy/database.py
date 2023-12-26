@@ -3,9 +3,9 @@ More on this stuff
 https://flask.palletsprojects.com/en/2.1.x/patterns/sqlalchemy/
 https://docs.sqlalchemy.org/en/14/orm/session_basics.html#session-getting
 """
+import json
 
 from flask import Flask
-import json
 from app.ext.sqlalchemy.model import db, User, Privilege
 
 
@@ -22,7 +22,7 @@ def init_database(app: Flask) -> None:
         if not app.config.get('IS_PRODUCTION'):
             db.drop_all()
             db.create_all()
-            with open("/run/secrets/app_admin") as f:
+            with open("/run/secrets/app_admin", encoding="utf-8") as f:
                 admin_info = json.load(f)
                 admin = User(**admin_info)
                 admin_privilege = Privilege(admin.uid, privilege="admin")

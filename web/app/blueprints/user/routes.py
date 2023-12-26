@@ -2,10 +2,12 @@
 This module contains all routes related to user pages and related processes
 """
 
-from flask import (Blueprint, render_template, Response, make_response, session,
-                   redirect, url_for, request)
+from flask import (Blueprint, render_template, Response, make_response, session, request)
+from sqlalchemy.exc import IntegrityError
+
 from app.ext.sqlalchemy.model import User
 from app.ext.sqlalchemy.database import db
+from app.blueprints.auth.routes import privileges_required_factory
 
 
 # do not rename "blueprint" variable if you want to use auto import
@@ -17,20 +19,17 @@ blueprint: Blueprint = Blueprint(
 
 
 @blueprint.route("/profile", methods=["GET", "POST"])
+@privileges_required_factory(tuple())  # no privileges required, just logged in
 def profile_route() -> Response:
     """
     Secure page to view user details. It allows to update username, password and personal info.
     :return: Response
     """
-
-    if "user_email" not in session:  # Logged in verification
-        return redirect(url_for("auth.login_route"))
-
     # Get session user data from database
     user = db.session.execute(
         db.select(User).
         where(
-            User.email == session.get("user_email")
+            User.uid == session.get("user_uid")
         )).scalar()
 
     # Form errors for jinja2 template
@@ -45,11 +44,15 @@ def profile_route() -> Response:
         if request.form.get("form_type") == "update_username":
             try:
                 user.username = request.form.get("username")
+                user.email = request.form.get("email")
                 user.verified = True  # tell the db that there are changes to commit
                 db.session.commit()
             except ValueError as e:
                 db.session.rollback()  # cancel changes
                 form_errors["username_error"] = e.args[0]
+            except IntegrityError:
+                db.session.rollback()
+                form_errors["username_error"] = ("Le nom d'utilisateur ou le courriel est déjà pris",)
 
         elif request.form.get("form_type") == "update_password":
             is_valid_password = user.check_password(request.form.get("password"))

@@ -3,6 +3,8 @@ Modèle de base.
 """
 
 from string import capwords
+import re
+
 from sqlalchemy import Column, ForeignKey, String, CheckConstraint
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -12,7 +14,6 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.utils import camel_to_snake
-import re
 
 
 def id_column() -> Column:
@@ -85,7 +86,7 @@ class User(db.Model):
     last_name: last name of the user. Must be alphabetic and between 1 and 32 characters long
     profile_description: description of the user's profile. Must be between 0 and 512 characters long
     """
-
+    # pylint: disable=R0902
     _uid = id_column()
     _email = Column(String(64),
                     CheckConstraint("REGEXP_LIKE(_email, '^([a-z[-] ])+[.]([a-z[-] ])+([.][0-9]*)?@ulaval[.]ca$')"),
@@ -102,6 +103,7 @@ class User(db.Model):
 
     _privileges = relationship("Privilege", backref="user")
 
+    # pylint: disable=R0913
     def __init__(self, password: str = None, username: str = None, first_name: str = None,
                  last_name: str = None, email: str = None, profile_description: str = None) -> None:
         """
@@ -167,7 +169,7 @@ class User(db.Model):
             "L'adresse courriel doit respecter le format de l'université Laval":
                 bool(re.match(r'^([a-z\- ])+\.([a-z\- ])+(\.[0-9]*)?@ulaval\.ca$', email) is not None)
         }
-        return all(is_valid.keys()), tuple(key for key, value in is_valid.items() if not value)
+        return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
 
     @hybrid_property
     def password(self) -> str:

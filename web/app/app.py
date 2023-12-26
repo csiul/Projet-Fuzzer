@@ -4,6 +4,7 @@ Utilitaires pour l'application
 """
 
 import os
+import urllib.parse
 
 from flask import Flask, request, redirect
 from flask_debugtoolbar import DebugToolbarExtension
@@ -19,8 +20,6 @@ from app.ext.sentry import init_sentry
 from app.ext.cache import cache
 
 from app.commands import init_app_cli
-
-import urllib.parse
 
 
 def init_configuration(app: Flask) -> None:
@@ -53,7 +52,7 @@ def create_app() -> Flask:
 
     init_sentry(app)
 
-    with open("/run/secrets/db_password") as f:
+    with open("/run/secrets/db_password", encoding="utf-8") as f:
         db_user = "web"
         db_password = f.readline()
         app.config["SQLALCHEMY_DATABASE_URI"] = \
