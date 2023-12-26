@@ -1,7 +1,8 @@
-from flask import Blueprint, make_response, render_template, current_app, Response
-from sqlalchemy import text
-from app.ext.sqlalchemy.database import db
-
+"""
+Routes liées à la page d'accueil
+"""
+from flask import Blueprint, make_response, render_template, Response
+from app.blueprints.index_page.views.index import get_plugins
 
 blueprint: Blueprint = Blueprint(
     'index',
@@ -13,12 +14,24 @@ blueprint: Blueprint = Blueprint(
 
 @blueprint.route("/", methods=["get"])
 def index_route() -> Response:
-
-    result = db.session.execute(text("SELECT 1"))
-    value = result.scalar()
+    """
+    Display the index page with the list of plugins
+    :return: Index page with plugins
+    """
+    plugins = get_plugins()
     return make_response(
         render_template(
             "index.jinja2",
-            sql_value=value
+            plugins=plugins
         )
     )
+
+
+# pylint: disable=unused-argument, unnecessary-pass
+@blueprint.route("/fuzz-plugin/<slug>", methods=["get"])
+def fuzz_plugin_route(slug) -> Response:
+    """
+    Fuzz a plugin (the function does nothing because it needs to be implemented with the API)
+    :param slug: Plugin slug
+    """
+    pass
