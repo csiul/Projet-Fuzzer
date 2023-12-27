@@ -10,23 +10,43 @@
 {% block content %}
     <div style="display: flex; align-items: center; justify-content: center;
         height: 100vh;">
-    <div class="box" style="width: 50%; height: 50%">
         <form method="POST" action="/login">
+        <div class="box" style="display: flex; flex-direction: column">
+
             <h1 class="title" style="text-align: center">Connexion</h1>
-            <label for="username">Nom d'utilisateur</label>
-            <br>
-            <input class="input" type="text" id="username" name="username"  maxlength="32" required>
-            <br>
-            <label for="password">Mot de passe</label>
-            <br>
-            <input class="input" type="password" id="password" name="password" maxlength="32" required>
-            <br>
-            <div style="align-items: center">
-                <input class="button is-primary" type="submit" value="Se Connecter">
+
+            <div class="field">
+                <label class="label" for="username">Nom d'utilisateur</label>
+                <div class="control has-icons-left">
+                    <input class="input" type="text" id="username" name="username"  maxlength="32" required>
+                    <span class="icon is-small is-left">
+                        <i class="fas fa-user"></i>
+                    </span>
+                </div>
             </div>
-            {% if error != None %} {{ error }} {% endif %}
+
+            <div class="field">
+                <label class="label" for="password">Mot de passe</label>
+                <div class="control has-icons-left" style="text-align: center">
+                    <input class="input" type="password" id="password" name="password" maxlength="32" required>
+                    <span class="icon is-small is-left">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="field" style="text-align: center;">
+                <p class="control">
+                    <input class="button is-primary" type="submit" value="Se Connecter">
+                </p>
+            </div>
+            {% if error != None %}
+                <p class="help is-danger">
+                    {{ error }}
+                </p>
+            {% endif %}
+        </div>
         </form>
-    </div>
     </div>
 
 {% endblock %}

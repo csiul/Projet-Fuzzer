@@ -3,7 +3,6 @@ import secrets
 import click
 import string
 import json
-import os
 
 from string import Template
 
@@ -46,8 +45,7 @@ def create_instance_config():
 
 
 def generate_random_password(length: int = 20) -> str:
-    alphabet = (string.ascii_letters + string.digits + string.punctuation
-                .replace("'", "").replace('"', ""))
+    alphabet = string.ascii_letters + string.digits
     password = ""
     for i in range(length):
         password += secrets.choice(alphabet)
@@ -55,7 +53,6 @@ def generate_random_password(length: int = 20) -> str:
 
 
 def create_docker_secrets() -> None:
-    print(os.getcwd())
     filesystem.create_folder_if_not(SECRETS_FOLDER)
 
     if filesystem.has_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}"):
@@ -116,7 +113,6 @@ def create_app_admin() -> None:
 
 @click.command()
 def init_config() -> None:
-    print(os.path.isdir(".secrets/"))
     click.echo(click.style("*** Starting initial configuration ***", fg="green", bold=True))
 
     # instance/config.py
@@ -138,6 +134,7 @@ def init_config() -> None:
     create_app_admin()
 
     click.echo(click.style("All done. Now you can use 'flask run'", fg="green", bold=True))
+
 
 if __name__ == '__main__':
     init_config()
