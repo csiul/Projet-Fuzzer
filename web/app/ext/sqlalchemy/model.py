@@ -13,7 +13,7 @@ from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app.utils import camel_to_snake
+from ...utils import camel_to_snake
 
 
 def id_column() -> Column:
@@ -104,8 +104,8 @@ class User(db.Model):
     _privileges = relationship("Privilege", backref="user")
 
     # pylint: disable=R0913
-    def __init__(self, password: str = None, username: str = None, first_name: str = None,
-                 last_name: str = None, email: str = None, profile_description: str = None) -> None:
+    def __init__(self, password: str, username: str, first_name: str,
+                 last_name: str, email: str = None, profile_description: str = None) -> None:
         """
         Constructor.
         :param email: email address of the user
@@ -115,18 +115,12 @@ class User(db.Model):
         :param last_name: last name of the user
         :param profile_description: profile description of the user
         """
-        if email is not None:
-            self.email = email
-        if password is not None:
-            self.password = password
-        if username is not None:
-            self.username = username
-        if first_name is not None:
-            self.first_name = first_name
-        if last_name is not None:
-            self.last_name = last_name
-        if profile_description is not None:
-            self.profile_description = profile_description
+        self.email = email
+        self.password = password
+        self.username = username
+        self.first_name = first_name
+        self.last_name = last_name
+        self.profile_description = profile_description
 
     @hybrid_property
     def uid(self) -> int:
@@ -165,6 +159,8 @@ class User(db.Model):
         :return: tuple with the first element being True if the email address is valid, False otherwise
             and the second element being a tuple with the invalid criteria
         """
+        if email is None:
+            return True, tuple()
         is_valid = {
             "L'adresse courriel doit respecter le format de l'université Laval":
                 bool(re.match(r'^([a-z\- ])+\.([a-z\- ])+(\.[0-9]*)?@ulaval\.ca$', email) is not None)
@@ -187,18 +183,14 @@ class User(db.Model):
         :return: None
         :raises ValueError: if password is not strong enough
         """
-        # password is hashed
-        if len(password) == 102:
-            self._password = password
-            return
-        is_strong_password, criteria = User._check_password_strength(password)
+        is_strong_password, criteria = User.validate_password(password)
         if is_strong_password:
             self._password = generate_password_hash(password)
         else:
             raise ValueError(criteria)
 
     @classmethod
-    def _check_password_strength(cls, password) -> tuple[bool, tuple[str, ...]]:
+    def validate_password(cls, password) -> tuple[bool, tuple[str, ...]]:
         """
         Checks if the password is strong enough. Criteria are:
         - At least 8 characters long
@@ -249,14 +241,14 @@ class User(db.Model):
         :param username: username
         :raises ValueError: if username is not valid
         """
-        is_valid_username, criteria = User._validate_username(username)
+        is_valid_username, criteria = User.validate_username(username)
         if is_valid_username:
             self._username = username
         else:
             raise ValueError(criteria)
 
     @classmethod
-    def _validate_username(cls, username: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_username(cls, username: str) -> tuple[bool, tuple[str, ...]]:
         """
         Checks if the username is valid. Criteria are:
         - Between 4 and 32 characters long
@@ -292,14 +284,14 @@ class User(db.Model):
         :param first_name: first name
         :raises ValueError: if first name is not valid
         """
-        is_valid_first_name, criteria = User._validate_first_name(first_name)
+        is_valid_first_name, criteria = User.validate_first_name(first_name)
         if is_valid_first_name:
             self._first_name = capwords(first_name)
         else:
             raise ValueError(criteria)
 
     @classmethod
-    def _validate_first_name(cls, first_name: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_first_name(cls, first_name: str) -> tuple[bool, tuple[str, ...]]:
         """
         Checks if the first name is valid. Criteria are:
         - Between 1 and 32 characters long
@@ -332,14 +324,14 @@ class User(db.Model):
         :param last_name: last name
         :raises ValueError: if last name is not valid
         """
-        is_valid_last_name, criteria = User._validate_last_name(last_name)
+        is_valid_last_name, criteria = User.validate_last_name(last_name)
         if is_valid_last_name:
             self._last_name = capwords(last_name)
         else:
             raise ValueError(criteria)
 
     @classmethod
-    def _validate_last_name(cls, last_name: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_last_name(cls, last_name: str) -> tuple[bool, tuple[str, ...]]:
         """
         Checks if the last name is valid. Criteria are:
         - Between 1 and 32 characters long
@@ -372,14 +364,14 @@ class User(db.Model):
         :param profile_description: profile description
         :raises ValueError: if profile description is not valid
         """
-        is_valid_profile_description, criteria = User._validate_profile_description(profile_description)
+        is_valid_profile_description, criteria = User.validate_profile_description(profile_description)
         if is_valid_profile_description:
             self._profile_description = profile_description
         else:
             raise ValueError(criteria)
 
     @classmethod
-    def _validate_profile_description(cls, profile_description: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_profile_description(cls, profile_description: str) -> tuple[bool, tuple[str, ...]]:
         """
         Checks if the profile description is valid. Criteria are:
         - Between 0 and 512 characters long
@@ -389,6 +381,8 @@ class User(db.Model):
         :return: tuple with the first element being True if the profile description is valid, False otherwise
             and the second element being a tuple with the invalid criteria
         """
+        if profile_description is None:
+            return True, tuple()
         is_valid = {
             "La description du profil doit être entre 0 et 512 caractères ou null":
                 bool(0 <= len(profile_description) <= 512 or profile_description is None)
@@ -459,14 +453,14 @@ class Privilege(db.Model):
         :param privilege: privilege
         :raises ValueError: if privilege is not valid
         """
-        is_valid_privilege, criteria = Privilege._validate_privilege(privilege)
+        is_valid_privilege, criteria = Privilege.validate_privilege(privilege)
         if is_valid_privilege:
             self._privilege = privilege
         else:
             raise ValueError(criteria)
 
     @classmethod
-    def _validate_privilege(cls, privilege: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_privilege(cls, privilege: str) -> tuple[bool, tuple[str, ...]]:
         """
         Checks if the privilege is valid. Criteria are:
         - Must be one of the following:

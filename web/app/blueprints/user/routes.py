@@ -44,7 +44,7 @@ def profile_route() -> Response:
         if request.form.get("form_type") == "update_username":
             try:
                 user.username = request.form.get("username")
-                user.email = request.form.get("email")
+                user.email = request.form.get("email") if request.form.get("email") != "" else None
                 user.verified = True  # tell the db that there are changes to commit
                 db.session.commit()
             except ValueError as e:
@@ -74,7 +74,8 @@ def profile_route() -> Response:
             try:
                 user.first_name = request.form.get("first_name")
                 user.last_name = request.form.get("last_name")
-                user.profile_description = request.form.get("profile_description")
+                user.profile_description = request.form.get("profile_description") if \
+                    request.form.get("profile_description") != "" else None
                 user.verified = True  # tell the db that there are changes to commit
                 db.session.commit()
             except ValueError as e:

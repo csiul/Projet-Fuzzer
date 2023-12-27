@@ -23,7 +23,7 @@ services:
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock' # Accès à l'instance Docker
   db:
-    image: mysql:8.0.35-debian
+    build: 'db'
     volumes:
       - mysqldata:/var/lib/mysql
     environment:
@@ -35,6 +35,7 @@ services:
       - backend
     secrets:
       - db_root_password
+      - db_old_root_password
       - db_password
     healthcheck:
       # This is a dummy query. Using a ping or curl will return false positives
@@ -65,8 +66,10 @@ networks:
 
 secrets:
   db_password:
-    file: .secrets/db_password.txt
+    file: secrets/db_password.txt
   db_root_password:
-    file: .secrets/db_root_password.txt
+    file: secrets/db_root_password.txt
+  db_old_root_password:
+    file: secrets/db_old_root_password.txt
   app_admin:
-    file: .secrets/admin.json
+    file: secrets/admin.json

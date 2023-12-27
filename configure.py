@@ -3,10 +3,11 @@ import secrets
 import click
 import string
 import json
-from web.app.ext.sqlalchemy.model import User
+import os
 
 from string import Template
 
+from web.app.ext.sqlalchemy.model import User
 from web.app.utils import filesystem
 
 APP_CONFIG_FILE = "web/instance/config.py"
@@ -22,8 +23,9 @@ APP_CONFIG=$flask_env
 FLASK_RUN_PORT=$flask_port
 """
 
-SECRETS_FOLDER = ".secrets/"
+SECRETS_FOLDER = "secrets/"
 DB_ROOT_PASSWORD_FILE = "db_root_password.txt"
+DB_OLD_ROOT_PASSWORD_FILE = "db_old_root_password.txt"
 DB_PASSWORD_FILE = "db_password.txt"
 
 
@@ -53,21 +55,25 @@ def generate_random_password(length: int = 20) -> str:
 
 
 def create_docker_secrets() -> None:
+    print(os.getcwd())
     filesystem.create_folder_if_not(SECRETS_FOLDER)
 
     if filesystem.has_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}"):
-        click.echo("Looks like you already have %s" % DB_PASSWORD_FILE)
-    else:
-        # web db user password
-        filesystem.set_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}", generate_random_password(32))
-        click.echo(click.style("[x] created db user password for web container", fg="green", bold=True))
+        click.echo("Updating %s" % DB_PASSWORD_FILE)
+    # web db user password
+    filesystem.set_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}", generate_random_password(32))
+    click.echo(click.style("[x] created db user password for web container", fg="green", bold=True))
 
     if filesystem.has_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}"):
-        click.echo("Looks like you already have %s" % DB_ROOT_PASSWORD_FILE)
-    else:
-        # db root password
-        filesystem.set_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}", generate_random_password(32))
-        click.echo(click.style("[x] created root password for db", fg="green", bold=True))
+        click.echo("Updating %s" % DB_ROOT_PASSWORD_FILE)
+        filesystem.set_file(f"{SECRETS_FOLDER}{DB_OLD_ROOT_PASSWORD_FILE}",
+                            filesystem.read_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}").readline())
+    # db root password
+    filesystem.set_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}", generate_random_password(32))
+    click.echo(click.style("[x] created root password for db", fg="green", bold=True))
+    if not filesystem.has_file(f"{SECRETS_FOLDER}{DB_OLD_ROOT_PASSWORD_FILE}"):
+        filesystem.set_file(f"{SECRETS_FOLDER}{DB_OLD_ROOT_PASSWORD_FILE}",
+                            filesystem.read_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}").readline())
 
 
 def create_dot_env() -> None:
@@ -86,36 +92,31 @@ def create_dot_env() -> None:
 
 
 def create_app_admin() -> None:
-    admin = User()
+    admin_info = {}
     admin_arguments = ["username", "email", "password", "first_name", "last_name"]
 
     for arg in admin_arguments:
         is_valid_arg = False
         while not is_valid_arg:
-            try:
-                if arg == "email":
-                    user_input = click.prompt(f"Enter the admin {arg}", default="")
-                else:
-                    user_input = click.prompt(f"Enter the admin {arg}")
-                if user_input != "":
-                    admin.__setattr__(arg, user_input)
-            except ValueError as e:
-                for error in e.args[0]:
-                    click.echo(click.style(error, fg="red", bold=True))
+            if arg == "email":
+                user_input = click.prompt(f"Enter the admin {arg}", default="")
             else:
-                is_valid_arg = True
-    admin_info = {
-        "username": admin.username,
-        "email": admin.email,
-        "password": admin.password,
-        "first_name": admin.first_name,
-        "last_name": admin.last_name,
-    }
+                user_input = click.prompt(f"Enter the admin {arg}")
+            if user_input == "":
+                user_input = None
+            user_validation_method = getattr(User, "validate_" + arg)
+            is_valid_arg, criteria = user_validation_method(user_input)
+            if is_valid_arg:
+                admin_info[arg] = user_input
+            else:
+                for error in criteria:
+                    click.echo(click.style(error, fg="red", bold=True))
     filesystem.set_file(f"{SECRETS_FOLDER}admin.json", json.dumps(admin_info))
 
 
 @click.command()
 def init_config() -> None:
+    print(os.path.isdir(".secrets/"))
     click.echo(click.style("*** Starting initial configuration ***", fg="green", bold=True))
 
     # instance/config.py

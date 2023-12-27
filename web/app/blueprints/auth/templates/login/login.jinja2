@@ -8,17 +8,25 @@
 {% endblock %}
 
 {% block content %}
-
-    <form method="POST" action="/login">
-        <div class="login-form">
-            <h1>Connexion</h1>
+    <div style="display: flex; align-items: center; justify-content: center;
+        height: 100vh;">
+    <div class="box" style="width: 50%; height: 50%">
+        <form method="POST" action="/login">
+            <h1 class="title" style="text-align: center">Connexion</h1>
             <label for="username">Nom d'utilisateur</label>
-            <input type="text" id="username" name="username"  maxlength="32" required>
+            <br>
+            <input class="input" type="text" id="username" name="username"  maxlength="32" required>
+            <br>
             <label for="password">Mot de passe</label>
-            <input type="password" id="password" name="password" maxlength="32" required>
-            <input type="submit" value="Se Connecter">
-        </div>
-        {% if error != None %} {{ error }} {% endif %}
-    </form>
+            <br>
+            <input class="input" type="password" id="password" name="password" maxlength="32" required>
+            <br>
+            <div style="align-items: center">
+                <input class="button is-primary" type="submit" value="Se Connecter">
+            </div>
+            {% if error != None %} {{ error }} {% endif %}
+        </form>
+    </div>
+    </div>
 
 {% endblock %}

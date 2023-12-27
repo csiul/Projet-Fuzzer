@@ -16,7 +16,7 @@ venv.bak/
 .venv.bak/
 
 # Secrets docker
-.secrets/
+secrets/
 
 # Fichiers de log
 *.log

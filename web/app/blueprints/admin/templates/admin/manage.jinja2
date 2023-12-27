@@ -21,7 +21,8 @@
             {% for user in users %}
                 <tr>
                     <td><input type="text" name="username_{{ counter }}" id="username_{{ counter }}" value="{{ user.username }}"></td>
-                    <td><input type="text" name="email_{{ counter }}" id="email_{{ counter }}" value="{{ user.email }}"></td>
+                    <td><input type="text" name="email_{{ counter }}" id="email_{{ counter }}"
+                               value="{% if user.email != None %}{{ user.email }}{% endif %}"></td>
                     <td><input type="text" name="first_name{{ counter }}" id="first_name{{ counter }}" value="{{ user.first_name }}"></td>
                     <td><input type="text" name="last_name{{ counter }}" id="last_name{{ counter }}" value="{{ user.last_name }}"></td>
                     <td><input type="button" value="modifier" id="edit_button_{{ counter }}"></td>

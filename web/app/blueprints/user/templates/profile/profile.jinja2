@@ -15,7 +15,8 @@
                 maxlength="32">
             <br>
             <label for="email">Adresse courriel</label>
-            <input type="email" name="email" id="email" value="{{ user.email }}" maxlength="64">
+            <input type="email" name="email" id="email"
+                   value="{% if user.email != None %} {{ user.email }} {% endif %}" maxlength="64">
             <br>
             <input type="submit" value="Modifier">
             <input type="hidden" name="form_type" value="update_username">

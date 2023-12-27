@@ -31,7 +31,7 @@ def register_route() -> Response:
             try:
                 user = User(
                     username=request.form.get("username"),
-                    email=request.form.get("email"),
+                    email=request.form.get("email") if request.form.get("email") != "" else None,
                     last_name=request.form.get("last_name"),
                     first_name=request.form.get("first_name"),
                     password=request.form.get("password"))
