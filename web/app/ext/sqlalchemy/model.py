@@ -160,7 +160,7 @@ class User(db.Model):
             and the second element being a tuple with the invalid criteria
         """
         if email is None:
-            return True, dict()
+            return True, {}
         is_valid = {
             "L'adresse courriel doit respecter le format de l'université Laval":
                 bool(re.match(r'^([a-z\- ])+\.([a-z\- ])+(\.[0-9]*)?@ulaval\.ca$', email) is not None)

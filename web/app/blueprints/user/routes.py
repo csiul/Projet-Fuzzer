@@ -47,9 +47,8 @@ def validate_user_field() -> Response:
         validation_method = getattr(User, "validate_" + field_name)
     except AttributeError:
         return make_response(jsonify(f"No such user field to validate: {field_name}"), 400)
-    else:
-        is_valid, criteria = validation_method(field_value)
-        return make_response(jsonify({"is_valid": is_valid, "criteria": criteria}), 200)
+    is_valid, criteria = validation_method(field_value)
+    return make_response(jsonify({"is_valid": is_valid, "criteria": criteria}), 200)
 
 
 @blueprint.route("/user/update_field", methods=["POST"])
@@ -67,8 +66,7 @@ def update_user_field() -> Response:
     field_name = request.json.get("field_name")
     field_value = request.json.get("field_value")
 
-    response = {
-    }
+    response = {}
 
     try:
         setattr(user, field_name, field_value)
@@ -81,13 +79,11 @@ def update_user_field() -> Response:
         db.session.rollback()
         response["error"] = [key for key in e.args[0].keys() if not e.args[0][key]]
         return make_response(jsonify(response), 400)
-    except IntegrityError and field_name == "username":
+    except IntegrityError:
         db.session.rollback()
-        response["error"] = ["Le nom d'utilisateur est déjà pris"]
+        if field_name == "username":
+            response["error"] = ["Le nom d'utilisateur est déjà pris"]
+        elif field_name == "email":
+            response["error"] = ["L'adresse email est déjà prise"]
         return make_response(jsonify(response), 400)
-    except IntegrityError and field_name == "email":
-        db.session.rollback()
-        response["error"] = ["L'adresse email est déjà prise"]
-        return make_response(jsonify(response), 400)
-    else:
-        return make_response(jsonify('success'), 200)
+    return make_response(jsonify('success'), 200)
