@@ -151,7 +151,7 @@ class User(db.Model):
             raise ValueError(criteria)
 
     @classmethod
-    def validate_email(cls, email: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_email(cls, email: str) -> tuple[bool, dict[str, bool]]:
         """
         Checks if the email address is valid. Criteria are:
 
@@ -160,12 +160,12 @@ class User(db.Model):
             and the second element being a tuple with the invalid criteria
         """
         if email is None:
-            return True, tuple()
+            return True, dict()
         is_valid = {
             "L'adresse courriel doit respecter le format de l'université Laval":
                 bool(re.match(r'^([a-z\- ])+\.([a-z\- ])+(\.[0-9]*)?@ulaval\.ca$', email) is not None)
         }
-        return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
+        return all(is_valid.values()), is_valid
 
     @hybrid_property
     def password(self) -> str:
@@ -190,7 +190,7 @@ class User(db.Model):
             raise ValueError(criteria)
 
     @classmethod
-    def validate_password(cls, password) -> tuple[bool, tuple[str, ...]]:
+    def validate_password(cls, password) -> tuple[bool, dict[str, bool]]:
         """
         Checks if the password is strong enough. Criteria are:
         - At least 8 characters long
@@ -216,7 +216,7 @@ class User(db.Model):
             "Le mot de passe doit contenir au moins 1 caractère spécial":
                 bool(any(not char.isalnum() for char in password))
         }
-        return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
+        return all(is_valid.values()), is_valid
 
     def check_password(self, password):
         """
@@ -248,7 +248,7 @@ class User(db.Model):
             raise ValueError(criteria)
 
     @classmethod
-    def validate_username(cls, username: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_username(cls, username: str) -> tuple[bool, dict[str, bool]]:
         """
         Checks if the username is valid. Criteria are:
         - Between 4 and 32 characters long
@@ -267,7 +267,7 @@ class User(db.Model):
             "Le nom d'utilisateur ne doit contenir que des caractères alphanumériques":
                 bool(username.isalnum())
         }
-        return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
+        return all(is_valid.values()), is_valid
 
     @hybrid_property
     def first_name(self) -> str:
@@ -291,7 +291,7 @@ class User(db.Model):
             raise ValueError(criteria)
 
     @classmethod
-    def validate_first_name(cls, first_name: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_first_name(cls, first_name: str) -> tuple[bool, dict[str, bool]]:
         """
         Checks if the first name is valid. Criteria are:
         - Between 1 and 32 characters long
@@ -307,7 +307,7 @@ class User(db.Model):
             "Le prénom ne doit contenir que des caractères alphabétiques":
                 bool(first_name.isalpha())
         }
-        return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
+        return all(is_valid.values()), is_valid
 
     @hybrid_property
     def last_name(self) -> str:
@@ -331,7 +331,7 @@ class User(db.Model):
             raise ValueError(criteria)
 
     @classmethod
-    def validate_last_name(cls, last_name: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_last_name(cls, last_name: str) -> tuple[bool, dict[str, bool]]:
         """
         Checks if the last name is valid. Criteria are:
         - Between 1 and 32 characters long
@@ -347,7 +347,7 @@ class User(db.Model):
             "Le nom de famille ne doit contenir que des caractères alphabétiques":
                 bool(last_name.isalpha())
         }
-        return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
+        return all(is_valid.values()), is_valid
 
     @hybrid_property
     def profile_description(self) -> str:
@@ -460,7 +460,7 @@ class Privilege(db.Model):
             raise ValueError(criteria)
 
     @classmethod
-    def validate_privilege(cls, privilege: str) -> tuple[bool, tuple[str, ...]]:
+    def validate_privilege(cls, privilege: str) -> tuple[bool, dict[str, bool]]:
         """
         Checks if the privilege is valid. Criteria are:
         - Must be one of the following:
@@ -474,4 +474,4 @@ class Privilege(db.Model):
             "Le privilège doit être un de: admin":
                 bool(privilege in ['admin'])
         }
-        return all(is_valid.values()), tuple(key for key, value in is_valid.items() if not value)
+        return all(is_valid.values()), is_valid

@@ -2,7 +2,7 @@
 This module contains all routes related to user pages and related processes
 """
 
-from flask import (Blueprint, render_template, Response, make_response, session, request)
+from flask import Blueprint, render_template, Response, make_response, session, request, jsonify
 from sqlalchemy.exc import IntegrityError
 
 from app.ext.sqlalchemy.model import User
@@ -18,7 +18,7 @@ blueprint: Blueprint = Blueprint(
 )
 
 
-@blueprint.route("/profile", methods=["GET", "POST"])
+@blueprint.route("/profile", methods=["GET"])
 @privileges_required_factory(tuple())  # no privileges required, just logged in
 def profile_route() -> Response:
     """
@@ -32,54 +32,62 @@ def profile_route() -> Response:
             User.uid == session.get("user_uid")
         )).scalar()
 
-    # Form errors for jinja2 template
-    form_errors = {
-        "username_error": None,
-        "password_error": None,
-        "personal_info_error": None
+    return make_response(render_template("profile/profile.jinja2", user=user))
+
+
+@blueprint.route("/user/validate_field", methods=["POST"])
+@privileges_required_factory(tuple())  # no privileges required, just logged in
+def validate_user_field() -> Response:
+    """
+    Route for AJAX requests to validate field
+    """
+    field_name = request.json.get("field_name")
+    field_value = request.json.get("field_value")
+    try:
+        validation_method = getattr(User, "validate_" + field_name)
+    except AttributeError:
+        return make_response(jsonify(f"No such user field to validate: {field_name}"), 400)
+    else:
+        is_valid, criteria = validation_method(field_value)
+        return make_response(jsonify({"is_valid": is_valid, "criteria": criteria}), 200)
+
+
+@blueprint.route("/user/update_field", methods=["POST"])
+@privileges_required_factory(tuple())  # no privileges required, just logged in
+def update_user_field() -> Response:
+    """
+    Route for AJAX requests to update user fields
+    """
+    user = db.session.execute(
+        db.select(User).
+        where(
+            User.uid == session.get("user_uid")
+        )).scalar()
+
+    field_name = request.json.get("field_name")
+    field_value = request.json.get("field_value")
+
+    response = {
     }
 
-    if request.method == "POST":
-        # Update user data in database based on form_type
-        if request.form.get("form_type") == "update_username":
-            try:
-                user.username = request.form.get("username")
-                user.email = request.form.get("email") if request.form.get("email") != "" else None
-                user.verified = True  # tell the db that there are changes to commit
-                db.session.commit()
-            except ValueError as e:
-                db.session.rollback()  # cancel changes
-                form_errors["username_error"] = e.args[0]
-            except IntegrityError:
-                db.session.rollback()
-                form_errors["username_error"] = ("Le nom d'utilisateur ou le courriel est déjà pris",)
-
-        elif request.form.get("form_type") == "update_password":
-            is_valid_password = user.check_password(request.form.get("password"))
-            is_confirmed_password = request.form.get("new_password") == request.form.get("confirm_password")
-            if is_valid_password and is_confirmed_password:
-                try:
-                    user.password = request.form.get("confirm_password")
-                    user.verified = True  # tell the db that there are changes to commit
-                    db.session.commit()
-                except ValueError as e:
-                    db.session.rollback()  # cancel changes
-                    form_errors["password_error"] = e.args[0]
-            elif not is_valid_password:
-                form_errors["password_error"] = ("Invalid password",)
-            elif not is_confirmed_password:
-                form_errors["password_error"] = ("Password confirmation does not match",)
-
-        elif request.form.get("form_type") == "update_personal_info":
-            try:
-                user.first_name = request.form.get("first_name")
-                user.last_name = request.form.get("last_name")
-                user.profile_description = request.form.get("profile_description") if \
-                    request.form.get("profile_description") != "" else None
-                user.verified = True  # tell the db that there are changes to commit
-                db.session.commit()
-            except ValueError as e:
-                db.session.rollback()  # cancel changes
-                form_errors["personal_info_error"] = e.args[0]
-
-    return make_response(render_template("profile/profile.jinja2", user=user, **form_errors))
+    try:
+        setattr(user, field_name, field_value)
+        user.verified = True  # tell the db that there are changes to commit
+        db.session.commit()
+    except AttributeError:
+        response["error"] = [f"No such user field to update: {field_name}"]
+        return make_response(jsonify(response), 400)
+    except ValueError as e:
+        db.session.rollback()
+        response["error"] = [key for key in e.args[0].keys() if not e.args[0][key]]
+        return make_response(jsonify(response), 400)
+    except IntegrityError and field_name == "username":
+        db.session.rollback()
+        response["error"] = ["Le nom d'utilisateur est déjà pris"]
+        return make_response(jsonify(response), 400)
+    except IntegrityError and field_name == "email":
+        db.session.rollback()
+        response["error"] = ["L'adresse email est déjà prise"]
+        return make_response(jsonify(response), 400)
+    else:
+        return make_response(jsonify('success'), 200)

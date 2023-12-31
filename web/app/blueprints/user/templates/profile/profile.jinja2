@@ -6,83 +6,323 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Page de profil</h1>
-    <div class="profile">
-        <form method="POST" action="/profile" name="profile_username">
-            <h2>Identifiant utilisateur</h2>
-            <label for="username">Nom d'utilisateur</label>
-            <input type="text" name="username" id="username" value="{{ user.username }}" required
-                maxlength="32">
-            <br>
-            <label for="email">Adresse courriel</label>
-            <input type="email" name="email" id="email"
-                   value="{% if user.email != None %} {{ user.email }} {% endif %}" maxlength="64">
-            <br>
-            <input type="submit" value="Modifier">
-            <input type="hidden" name="form_type" value="update_username">
-            {% if username_error != None %}
-                <ul>
-                {% for error in username_error  %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-                </ul>
-            {% endif %}
-        </form>
+    <div class="container" style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+        <div class="box">
+            <h1 class="title is-1">Page de profil</h1>
 
-        <form method="POST" action="/profile" name="profile_password">
-            <h2>Changement de mot de passe</h2>
-            <label for="password">Mot de passe</label>
-            <input type="password" name="password" id="password" required
-                maxlength="32">
-            <br>
-            <label for="new_password">Nouveau mot de passe</label>
-            <input type="password" name="new_password" id="new_password" required
-                maxlength="32">
-            <br>
-            <label for="confirm_password">Confirmation du nouveau mot de passe</label>
-            <input type="password" name="confirm_password" id="confirm_password" required
-                maxlength="32">
-            <br>
-            <input type="submit" value="Modifier">
-            <input type="hidden" name="form_type" value="update_password">
+                <div class="field">
+                    <label class="label" for="username">Nom d'utilisateur</label>
+                    <div class="field is-grouped">
+                        <div class="control has-icons-left has-icons-right">
+                            <input class="input" type="text" name="username" id="username" value="{{ user.username }}"
+                                   required maxlength="32" disabled oninput="validateField('username')">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <span class="icon is-small is-right" id="status_username">
 
-            {% if password_error != None %}
-                <ul>
-                {% for error in password_error %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-                </ul>
-            {% endif %}
+                            </span>
+                        </div>
+                        <div class="control" id="modify_username">
+                            <button class="button is-primary" onclick="enableModification('username')">
+                                Modifier
+                            </button>
+                        </div>
+                        <div class="control" id="save_username" style="display: none">
+                            <button class="button is-success" id="bt_save_username" onclick="saveModification('username')">
+                                Sauvegarder
+                            </button>
+                        </div>
+                        <div class="control" id="cancel_username" style="display: none">
+                            <button class="button is-danger" onclick="cancelModification('username')">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                    <div id="helper_username" style="display: none">
 
-        </form>
+                    </div>
+                </div>
 
-        <form method="POST" action="/profile" name="profile_personal_info">
-            <h2>Informations personnelles</h2>
-            <label for="first_name">Prénom</label>
-            <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}"
-                maxlength="32">
-            <br>
-            <label for="last_name">Nom de famille</label>
-            <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}"
-                maxlength="32">
-            <br>
-            <label for="profile_description">Description de profil</label>
-            <textarea id="profile_description" name="profile_description" rows="6" cols="40"
-                maxlength="512">
-                {%- if user.profile_description != None %}
-                    {{ user.profile_description }}
-                {% endif -%}
-            </textarea>
-            <br>
-            <input type="submit" value="Modifier">
-            <input type="hidden" name="form_type" value="update_personal_info">
-            {% if personal_info_error != None %}
-                <ul>
-                {% for error in personal_info_error %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-                </ul>
-            {% endif %}
-        </form>
+                <div class="field">
+                    <label class="label" for="email">Adresse courriel</label>
+                    <div class="field is-grouped">
+                        <div class="control has-icons-left has-icons-right">
+                            <input class="input" type="email" name="email" id="email" disabled
+                                   value="{% if user.email != None %} {{ user.email }} {% endif %}" maxlength="64"
+                                   oninput="validateField('email')">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <span class="icon is-small is-right" id="status_email">
+
+                            </span>
+                        </div>
+                        <div class="control" id="modify_email">
+                            <button class="button is-primary" onclick="enableModification('email')">Modifier</button>
+                        </div>
+                        <div class="control" id="save_email" style="display: none">
+                            <button class="button is-success" id="bt_save_email" onclick="saveModification('email')">
+                                Sauvegarder
+                            </button>
+                        </div>
+                        <div class="control" id="cancel_email" style="display: none">
+                            <button class="button is-danger" onclick="cancelModification('email')">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                    <div id="helper_email" style="display: none">
+
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="password">Mot de passe</label>
+                    <div class="field is-grouped">
+                        <div class="control has-icons-left has-icons-right">
+                            <input class="input" type="password" name="password" id="password" disabled
+                                maxlength="32" value="abcdefghijklmnopqrstuvwxyz123456">
+                            <span class="icon is small is-left">
+                                <i class="fas fa-key"></i>
+                            </span>
+                        </div>
+                        <div class="control">
+                            <button class="button is-primary">Modifier</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field" style="display: none">
+                    <label class="label" for="new_password">Nouveau mot de passe</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="password" name="new_password" id="new_password" required
+                            maxlength="32">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field" style="display: none">
+                    <label class="label" for="confirm_new_pw">Nouveau mot de passe</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="password" name="confirm_new_pw" id="confirm_new_pw" required
+                            maxlength="32">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="first_name">Prénom</label>
+                    <div class="field is-grouped">
+                        <div class="control has-icons-left has-icons-right">
+                            <input class="input" type="text" name="first_name" id="first_name" disabled
+                                maxlength="32" value="{{ user.first_name }}" oninput="validateField('first_name')">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-user-circle"></i>
+                            </span>
+                            <span class="icon is-small is-right" id="status_first_name">
+
+                            </span>
+                        </div>
+                        <div class="control" id="modify_first_name">
+                            <button class="button is-primary" onclick="enableModification('first_name')">Modifier</button>
+                        </div>
+                        <div class="control" id="save_first_name" style="display: none">
+                            <button class="button is-success" id="bt_save_first_name" onclick="saveModification('first_name')">
+                                Sauvegarder
+                            </button>
+                        </div>
+                        <div class="control" id="cancel_first_name" style="display: none">
+                            <button class="button is-danger" onclick="cancelModification('first_name')">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                    <div id="helper_first_name" style="display: none">
+
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="last_name">Nom de famille</label>
+                    <div class="field is-grouped">
+                        <div class="control has-icons-left has-icons-right">
+                            <input class="input" type="text" name="last_name" id="last_name" disabled
+                                maxlength="32" value="{{ user.last_name }}" oninput="validateField('last_name')">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-user-circle"></i>
+                            </span>
+                            <span class="icon is-small is-right" id="status_last_name">
+
+                            </span>
+                        </div>
+                        <div class="control" id="modify_last_name">
+                            <button class="button is-primary" onclick="enableModification('last_name')">Modifier</button>
+                        </div>
+                        <div class="control" id="save_last_name" style="display: none">
+                            <button class="button is-success" id="bt_save_last_name" onclick="saveModification('last_name')">
+                                Sauvegarder
+                            </button>
+                        </div>
+                        <div class="control" id="cancel_last_name" style="display: none">
+                            <button class="button is-danger" onclick="cancelModification('last_name')">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                    <div id="helper_last_name" style="display: none">
+
+                    </div>
+                </div>
+        </div>
     </div>
+
+    <script>
+        window.change_username = new XMLHttpRequest();
+
+        function enableField(field)
+        {
+            let input_field = document.getElementById(field);
+            input_field.removeAttribute("disabled");
+            input_field.focus();
+            window['initial_' + field] = input_field.value;
+            input_field.value = "";
+            input_field.value = window['initial_' + field];
+        }
+
+        function disableField(field)
+        {
+            let input_field = document.getElementById(field);
+            input_field.setAttribute("disabled", "disabled");
+        }
+
+        function displayElement(...args)
+        {
+            args.forEach((arg) => {
+                document.getElementById(arg).style.display = "block";
+            });
+        }
+
+        function hideElement(...args)
+        {
+            args.forEach((arg) => {
+                document.getElementById(arg).style.display = "none";
+            });
+        }
+
+        function enableModification(field)
+        {
+            enableField(field);
+            displayElement('save_' + field, 'cancel_' + field, 'helper_' + field);
+            hideElement('modify_' + field);
+        }
+
+        function cancelModification(field)
+        {
+            document.getElementById(field).value = window['initial_' + field];
+            disableField(field);
+            displayElement('modify_' + field);
+            hideElement('save_' + field, 'cancel_' + field, 'helper_' + field);
+            delete window['initial_' + field];
+            document.getElementById('helper_' + field).innerHTML = '';
+            document.getElementById('bt_save_' + field).classList.remove('is-loading');
+            document.getElementById(field).className = "input";
+            document.getElementById('status_' + field).innerHTML = '';
+        }
+
+        function saveModification(field)
+        {
+            disableField(field);
+            let request = new XMLHttpRequest();
+            let url = "/user/update_field";
+            let data = {};
+            data['field_value'] = document.getElementById(field).value
+            data['field_name'] = field;
+            request.open("POST", url);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.onreadystatechange = function()
+            {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200)
+                {
+                    window['initial_' + field] = data['field_value'];
+                    cancelModification(field)
+                }
+                else if (this.readyState === XMLHttpRequest.DONE && this.status === 400)
+                {
+                    let response = JSON.parse(this.responseText);
+                    let helper_field = document.getElementById("helper_" + field);
+                    let input_field = document.getElementById(field);
+                    let status_field = document.getElementById("status_" + field);
+                    helper_field.innerHTML = '';
+                    input_field.className = "input";
+                    status_field.innerHTML = '';
+                    input_field.classList.add("is-danger");
+                    let icon = document.createElement("i");
+                    icon.classList.add("fas");
+                    icon.classList.add("fa-times");
+                    status_field.appendChild(icon);
+                    let error = response['error'];
+                    console.log(error);
+                    for (let i in error)
+                    {
+                        let p = document.createElement("p");
+                        p.classList.add("help");
+                        p.classList.add("is-danger");
+                        p.innerHTML = error[i];
+                        helper_field.appendChild(p);
+                    }
+                    document.getElementById('bt_save_' + field).classList.remove('is-loading');
+                    enableModification(field)
+                }
+            }
+            request.send(JSON.stringify(data));
+            document.getElementById('bt_save_' + field).classList.add('is-loading');
+        }
+
+        function validateField(field)
+        {
+            let request = new XMLHttpRequest();
+            let url = "/user/validate_field";
+            let data = {};
+            data['field_value'] = document.getElementById(field).value
+            data['field_name'] = field;
+            request.open("POST", url);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.onreadystatechange = function()
+            {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200)
+                {
+
+                    let helper_field = document.getElementById("helper_" + field);
+                    let input_field = document.getElementById(field);
+                    let status_field = document.getElementById("status_" + field);
+                    helper_field.innerHTML = '';
+                    input_field.className = "input";
+                    status_field.innerHTML = '';
+                    let response = JSON.parse(this.responseText);
+                    let is_valid = response['is_valid'];
+                    input_field.classList.add(is_valid === true ? "is-success" : "is-danger");
+                    let icon = document.createElement("i");
+                    icon.classList.add("fas");
+                    icon.classList.add(is_valid === true ? "fa-check" : "fa-times");
+                    status_field.appendChild(icon);
+                    let criteria = response['criteria'];
+                    for (let key in criteria)
+                    {
+                        let p = document.createElement("p");
+                        p.classList.add("help");
+                        p.classList.add(criteria[key] === true ? "is-success" : "is-danger");
+                        p.innerHTML = key;
+                        helper_field.appendChild(p);
+                    }
+                }
+            }
+            request.send(JSON.stringify(data));
+            document.getElementById('status_' + field).innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+        }
+    </script>
 {% endblock %}

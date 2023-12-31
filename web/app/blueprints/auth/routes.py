@@ -51,6 +51,7 @@ def privileges_required_factory(privileges_required: tuple):
         return decorated_function
     return decorator
 
+
 @blueprint.route("/login", methods=["GET", "POST"])
 def login_route() -> Response:
     """
