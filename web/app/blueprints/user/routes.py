@@ -57,6 +57,7 @@ def update_user_field() -> Response:
     """
     Route for AJAX requests to update user fields
     """
+    # the user to update
     user = db.session.execute(
         db.select(User).
         where(
@@ -68,6 +69,12 @@ def update_user_field() -> Response:
 
     response = {}
 
+    if field_name == "password":
+        if not user.check_password(request.json.get('field_old_value')):
+            response['error_type'] = 'old_password'
+            response['error'] = ['Mot de passe invalide']
+            return make_response(jsonify(response), 400)
+
     try:
         setattr(user, field_name, field_value)
         user.verified = True  # tell the db that there are changes to commit
@@ -77,6 +84,8 @@ def update_user_field() -> Response:
         return make_response(jsonify(response), 400)
     except ValueError as e:
         db.session.rollback()
+        if field_name == 'password':
+            response["error_type"] = 'password'
         response["error"] = [key for key in e.args[0].keys() if not e.args[0][key]]
         return make_response(jsonify(response), 400)
     except IntegrityError:

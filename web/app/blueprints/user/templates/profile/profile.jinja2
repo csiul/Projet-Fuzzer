@@ -78,40 +78,70 @@
                 </div>
 
                 <div class="field">
-                    <label class="label" for="password">Mot de passe</label>
+                    <label class="label" for="old_password">Mot de passe</label>
                     <div class="field is-grouped">
                         <div class="control has-icons-left has-icons-right">
-                            <input class="input" type="password" name="password" id="password" disabled
-                                maxlength="32" value="abcdefghijklmnopqrstuvwxyz123456">
+                            <input class="input" type="password" name="old_password" id="old_password" disabled
+                                maxlength="32" value="abcdefghijklmnopqrstuvwxyz123456"
+                                   oninput="resetField('old_password')">
                             <span class="icon is small is-left">
                                 <i class="fas fa-key"></i>
                             </span>
+                            <span class="icon is-small is-right" id="status_old_password">
+
+                        </span>
                         </div>
-                        <div class="control">
-                            <button class="button is-primary">Modifier</button>
+                        <div class="control" id="modify_password">
+                            <button class="button is-primary" id="bt_modify_password"
+                                    onclick="enablePasswordModification()">Modifier</button>
                         </div>
+                        <div class="control" id="save_password" style="display: none">
+                            <button class="button is-success" id="bt_save_password" onclick="savePasswordModification()">
+                                Sauvegarder
+                            </button>
+                        </div>
+                        <div class="control" id="cancel_password" style="display: none">
+                            <button class="button is-danger" onclick="cancelPasswordModification()">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                    <div id="helper_old_password" style="display: none">
+
                     </div>
                 </div>
 
-                <div class="field" style="display: none">
-                    <label class="label" for="new_password">Nouveau mot de passe</label>
+                <div class="field" style="display: none" id="field_password">
+                    <label class="label" for="password">Nouveau mot de passe</label>
                     <div class="control has-icons-left has-icons-right">
-                        <input class="input" type="password" name="new_password" id="new_password" required
-                            maxlength="32">
+                        <input class="input" type="password" name="password" id="password" required
+                            maxlength="32" oninput="checkPasswordMatch(); validateField('password')">
                         <span class="icon is-small is-left">
                             <i class="fas fa-lock"></i>
                         </span>
+                        <span class="icon is-small is-right" id="status_password">
+
+                        </span>
+                    </div>
+                    <div id="helper_password" style="display: none">
+
                     </div>
                 </div>
 
-                <div class="field" style="display: none">
-                    <label class="label" for="confirm_new_pw">Nouveau mot de passe</label>
+                <div class="field" style="display: none" id="field_confirm_password">
+                    <label class="label" for="confirm_password">Confirmer mot de passe</label>
                     <div class="control has-icons-left has-icons-right">
-                        <input class="input" type="password" name="confirm_new_pw" id="confirm_new_pw" required
-                            maxlength="32">
+                        <input class="input" type="password" name="confirm_password" id="confirm_password" required
+                            maxlength="32" oninput="checkPasswordMatch()">
                         <span class="icon is-small is-left">
                             <i class="fas fa-lock"></i>
                         </span>
+                        <span class="icon is-small is-right" id="status_confirm_password">
+
+                        </span>
+                    </div>
+                    <div id="helper_confirm_password" style="display: none">
+
                     </div>
                 </div>
 
@@ -266,7 +296,6 @@
                     icon.classList.add("fa-times");
                     status_field.appendChild(icon);
                     let error = response['error'];
-                    console.log(error);
                     for (let i in error)
                     {
                         let p = document.createElement("p");
@@ -323,6 +352,162 @@
             }
             request.send(JSON.stringify(data));
             document.getElementById('status_' + field).innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+        }
+
+        function enablePasswordModification()
+        {
+            displayElement('field_password', 'field_confirm_password', 'save_password', 'cancel_password',
+                'helper_password', 'helper_confirm_password', 'helper_old_password');
+            hideElement('modify_password');
+            enableField('old_password');
+            enableField('password');
+            enableField('confirm_password');
+            enableField('old_password');
+            document.getElementById('old_password').value = "";
+        }
+
+        function cancelPasswordModification()
+        {
+            let password_related_fields = ['password','confirm_password', 'old_password'];
+            for (let i in password_related_fields)
+            {
+                let field = password_related_fields[i];
+                let input_field = document.getElementById(field);
+                let helper_field = document.getElementById('helper_' + field);
+                let status_field = document.getElementById('status_' + field);
+                input_field.value = "";
+                input_field.className = "input";
+                helper_field.innerHTML = '';
+                status_field.innerHTML = '';
+            }
+
+
+            hideElement('field_password', 'field_confirm_password', 'save_password', 'cancel_password',
+                'helper_password', 'helper_confirm_password');
+            displayElement('modify_password');
+            disableField('old_password');
+            document.getElementById('old_password').value = "abcdefghijklmnopqrstuvwxyz123456";
+        }
+
+        function checkPasswordMatch()
+        {
+            let password_field = document.getElementById('password');
+            let confirm_password_field = document.getElementById('confirm_password');
+            let helper_field = document.getElementById('helper_confirm_password');
+            let status_field = document.getElementById('status_confirm_password');
+            if (password_field.value !== confirm_password_field.value)
+            {
+                helper_field.innerHTML = '<p class="help is-danger">Les mots de passe ne correspondent pas</p>';
+                confirm_password_field.className="input is-danger";
+                status_field.innerHTML = '<i class="fas fa-times"></i>';
+            }
+            else
+            {
+                helper_field.innerHTML = '';
+                confirm_password_field.className="input is-success";
+                status_field.innerHTML = '<i class="fas fa-check"></i>';
+            }
+            return password_field.value === confirm_password_field.value;
+        }
+
+        function isFilledPasswordForm()
+        {
+            let password_form_fields = ['old_password', 'password', 'confirm_password'];
+            for (let i in password_form_fields)
+            {
+                let field = password_form_fields[i];
+                if (document.getElementById(field).value === "")
+                {
+                    document.getElementById(field).focus();
+                    document.getElementById(field).className = "input is-danger";
+                    document.getElementById('status_' + field).innerHTML = '<i class="fas fa-times"></i>';
+                    document.getElementById('helper_' + field).innerHTML = '<p class="help is-danger">Ce champ est requis</p>';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function savePasswordModification()
+        {
+            if (!isFilledPasswordForm())
+            {
+                return;
+            }
+            if (!checkPasswordMatch())
+            {
+                return;
+            }
+            disableField('old_password');
+            disableField('password');
+            disableField('confirm_password');
+            resetField('old_password');
+            resetField('password');
+            resetField('confirm_password');
+            let request = new XMLHttpRequest();
+            let url = "/user/update_field";
+            let data = {};
+            data['field_value'] = document.getElementById('password').value
+            data['field_name'] = 'password';
+            data['field_old_value'] = document.getElementById('old_password').value
+            request.open("POST", url);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.onreadystatechange = function()
+            {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200)
+                {
+                    cancelPasswordModification();
+                }
+                else if (this.readyState === XMLHttpRequest.DONE && this.status === 400)
+                {
+
+                    enableField('old_password');
+                    enableField('password');
+                    enableField('confirm_password');
+                    let response = JSON.parse(this.responseText);
+                    let error_type = response['error_type'];
+                    let helper_field = document.getElementById("helper_old_password");
+                    if (error_type === 'password')
+                    {
+                        helper_field = document.getElementById("helper_password");
+                        document.getElementById('password').className = "input is-danger";
+                        document.getElementById('status_password').innerHTML = '<i class="fas fa-times"></i>';
+                        document.getElementById('password').focus();
+
+                    }
+                    if (error_type === 'old_password')
+                    {
+                        document.getElementById('old_password').className = "input is-danger";
+                        document.getElementById('status_old_password').innerHTML = '<i class="fas fa-times"></i>';
+                        document.getElementById('old_password').focus();
+                    }
+                    else
+                    {
+                        document.getElementById('old_password').className = "input is-success";
+                        document.getElementById('status_old_password').innerHTML = '<i class="fas fa-check"></i>';
+                    }
+                    let error = response['error'];
+                    for (let i in error)
+                    {
+                        let p = document.createElement("p");
+                        p.classList.add("help");
+                        p.classList.add("is-danger");
+                        p.innerHTML = error[i];
+                        helper_field.appendChild(p);
+                    }
+
+                }
+                document.getElementById('bt_save_password').classList.remove('is-loading');
+            }
+            request.send(JSON.stringify(data));
+            document.getElementById('bt_save_password').classList.add('is-loading');
+        }
+
+        function resetField(field)
+        {
+            document.getElementById(field).className='input';
+            document.getElementById('helper_' + field).innerHTML = ''
+            document.getElementById('status_' + field).innerHTML = ''
         }
     </script>
 {% endblock %}

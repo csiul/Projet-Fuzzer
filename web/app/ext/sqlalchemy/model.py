@@ -146,7 +146,7 @@ class User(db.Model):
         """
         is_valid_email, criteria = User.validate_email(email)
         if is_valid_email:
-            self._email = email
+            self._email = None if email == '' else email
         else:
             raise ValueError(criteria)
 
@@ -159,7 +159,7 @@ class User(db.Model):
         :return: tuple with the first element being True if the email address is valid, False otherwise
             and the second element being a tuple with the invalid criteria
         """
-        if email is None:
+        if email is None or email == '':
             return True, {}
         is_valid = {
             "L'adresse courriel doit respecter le format de l'université Laval":
