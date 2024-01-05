@@ -38,6 +38,9 @@ def init_configuration(app: Flask) -> None:
     # Load the configuration from the instance folder
     app.config.from_pyfile('config.py')
 
+    # Does not intercept redirects by default
+    app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+
 
 def create_app() -> Flask:
     """

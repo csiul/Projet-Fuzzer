@@ -1,6 +1,69 @@
 {% extends 'layouts/main.jinja2' %}
 
 {% block content %}
+<div class="m-6">
+  <div class="columns">
+    <div class="column">
+      <h1 class="title">Projet fuzzer</h1>
+      <h2 class="subtitle"> {{ plugins_count }} plugins </h2>
+      <h2 class="subtitle"> État du fuzzer : {{ fuzzer_state }} </h2>
+    </div>
+    <div class="column">
+      <h2 class="subtitle">Statut de l'API
+        {% if api_status %}
+        <span class="icon has-text-success">
+        {% else %}
+        <span class="icon has-text-danger">
+        {% endif %}
+          <i class="fa-solid fa-circle"></i>
+        </span>
+      </h2>
+    </div>
+  </div>
+  <div>
+    <h2 class="subtitle">Obtenir un plugin aléatoire</h2>
+    <button class="button is-primary" type=button id="random-plugin-button">Plugin aléatoire</button>
+  </div>
+  <table class="table is-bordered is-striped" id="random-plugin-table" style="display:none">
+    <thead>
+      <tr>
+        <th scope="col">Plugin</th>
+        <th scope="col">Description</th>
+        <th scope="col">Added</th>
+        <th scope="col">Last Updated</th>
+        <th scope="col">Fuzz</th>
+        <th scope="col">Already Fuzzed</th>
+        <th scope="col">Fuzzing Results</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr id="random-plugin-data"></tr>
+    </tbody>
+  </table>
+  <br>
+  <div>
+    <h2 class="subtitle">Recherche</h2>
+    <input class="input" type="text" placeholder="Rechercher un plugin" id="search-plugin-input">
+    <button class="button is-primary" type=button id="search-plugin-button">Rechercher</button>
+  </div>
+  <table class="table is-bordered is-striped" id="search-plugin-table" style="display:none">
+    <thead>
+      <tr>
+        <th scope="col">Plugin</th>
+        <th scope="col">Description</th>
+        <th scope="col">Added</th>
+        <th scope="col">Last Updated</th>
+        <th scope="col">Fuzz</th>
+        <th scope="col">Already Fuzzed</th>
+        <th scope="col">Fuzzing Results</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr id="search-plugin-data"></tr>
+    </tbody>
+  </table>
+  <br>
+  <h2 class="subtitle">Plugins</h2>
   <table class="table is-bordered is-striped">
     <thead>
       <tr>
@@ -9,6 +72,8 @@
         <th scope="col">Added</th>
         <th scope="col">Last Updated</th>
         <th scope="col">Fuzz</th>
+        <th scope="col">Already Fuzzed</th>
+        <th scope="col">Fuzzing Results</th>
       </tr>
     </thead>
     <tbody>
@@ -20,11 +85,85 @@
           <td>{{ plugin.last_updated }}</td>
           <td>
             <form action="{{ url_for('index.fuzz_plugin_route', slug=plugin.slug) }}">
-              <button class="button is-primary" type=submit>Fuzz</button>
+              {% if fuzzer_state == 'FUZZING' %}<button class="button is-primary" type=submit disabled>Fuzz</button>{% else %}<button class="button is-primary" type=submit>Fuzz</button>{% endif %}
             </form>
           </td>
+          <td>{% if plugin.slug in already_fuzzed_plugins %}
+          <span class="icon is-medium"><i class="fa-lg fa-solid fa-check"></i></span>
+          {% else %}
+          <span class="icon is-medium"><i class="fa-lg fa-solid fa-xmark"></i></span>
+          {% endif %}</td>
+          <td>{% if plugin.slug in already_fuzzed_plugins %}
+            <form action="{{ url_for('index.download_plugin_results_route', slug=plugin.slug) }}">
+              <button class="button is-primary" type=submit>Download</button>
+            </form>
+          {% endif %}</td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    $("#random-plugin-button").click(function() {
+        $.get("{{ url_for('index.random_plugin_route') }}", function(data) {
+            const fuzzPluginUrl = "{{ url_for('index.fuzz_plugin_route', slug='') }}" + data.slug;
+            const fuzzButton = "{% if fuzzer_state == 'FUZZING' %}<button class='button is-primary' type=submit disabled>Fuzz</button>{% else %}<button class='button is-primary' type=submit>Fuzz</button>{% endif %}";
+            $("#random-plugin-data").html(
+                "<td>" + data.name + "</td>" +
+                "<td>" + data.short_description + "</td>" +
+                "<td>" + data.added + "</td>" +
+                "<td>" + data.last_updated + "</td>" +
+                "<td>" +
+                "<form action=\"" + fuzzPluginUrl + "\">" +
+                fuzzButton +
+                "</form>" +
+                "</td>" +
+                "<td>" +
+                "<span class=\"icon is-medium\"><i class=\"fa-lg fa-solid fa-xmark\"></i></span>" +
+                "</td>" +
+                "<td>" +
+                "</td>"
+            );
+            $("#random-plugin-table").show()
+        });
+    });
+    $("#search-plugin-button").click(function() {
+        const searchPluginInput = $("#search-plugin-input").val();
+        if (searchPluginInput == "") {
+            return;
+        }
+        let url = "{{ url_for('index.search_plugin_route', slug='') }}" + searchPluginInput;
+        $.get(url, function(data) {
+            const fuzzPluginUrl = "{{ url_for('index.fuzz_plugin_route', slug='') }}" + data.slug;
+            const fuzzButton = "{% if fuzzer_state == 'FUZZING' %}<button class='button is-primary' type=submit disabled>Fuzz</button>{% else %}<button class='button is-primary' type=submit>Fuzz</button>{% endif %}";
+            if (data.exists == false) {
+                $("#search-plugin-data").html(
+                    "<td colspan=\"7\">Aucun plugin trouvé</td>"
+                );
+                $("#search-plugin-table").show();
+            } else {
+              $("#search-plugin-data").html(
+                  "<td>" + data.name + "</td>" +
+                  "<td>" + data.short_description + "</td>" +
+                  "<td>" + data.added + "</td>" +
+                  "<td>" + data.last_updated + "</td>" +
+                  "<td>" +
+                  "<form action=\"" + fuzzPluginUrl + "\">" +
+                  fuzzButton +
+                  "</form>" +
+                  "</td>" +
+                  "<td>" +
+                  "<span class=\"icon is-medium\"><i class=\"fa-lg fa-solid fa-xmark\"></i></span>" +
+                  "</td>" +
+                  "<td>" +
+                  "</td>"
+              );
+              $("#search-plugin-table").show();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
