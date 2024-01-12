@@ -6,33 +6,353 @@
 {% endblock %}
 
 {% block content %}
-        <h2>Ajout d'un utilisateur</h2>
-        <form method="POST" action="/register" name="add_user">
-            <table>
-                <tr>
-                    <th>Nom d'utilisateur</th>
-                    <th>Courriel</th>
-                    <th>Prénom</th>
-                    <th>Nom de famille</th>
-                    <th>Mot de passe</th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <td><input type="text" name="username" id="username" maxlength="32" required></td>
-                    <td><input type="email" name="email" id="email" maxlength="64"></td>
-                    <td><input type="text" name="first_name" id="first_name" maxlength="32" required></td>
-                    <td><input type="text" name="last_name" id="last_name" maxlength="32" required></td>
-                    <td><input type="text" name="password" id="password" maxlength="32" required></td>
-                    <td><input type="submit" value="Ajouter"></td>
-                </tr>
-            </table>
-            {% if add_user_error != None  %}
-                {% for error in add_user_error %}
-                    <ul>
-                    <li>{{ error }}</li>
-                    </ul>
-                {% endfor %}
-            {% endif %}
-            <input type="hidden" name="form_type" value="add_user">
-        </form>
+    <div class="container" style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+        <div class="box">
+            <h1 class="title is-1">Ajout d'un utilisateur</h1>
+            <form id="new_user" novalidate autocomplete="off">
+                <div class="field">
+                    <label class="label" for="username">Nom d'utilisateur</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" name="username" id="username"
+                               required maxlength="32">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <span class="icon is-small is-right" id="status_username">
+
+                        </span>
+                    </div>
+                    <div id="helper_username">
+
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="email">Adresse courriel</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="email" name="email" id="email"
+                                maxlength="64">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <span class="icon is-small is-right" id="status_email">
+
+                        </span>
+                    </div>
+                    <div id="helper_email">
+
+                    </div>
+                </div>
+
+                <div class="field" id="field_password">
+                    <label class="label" for="password">Mot de passe</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" name="password" id="password" required
+                            maxlength="32">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <span class="icon is-small is-right" id="status_password">
+
+                        </span>
+                    </div>
+                    <div id="helper_password">
+
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="first_name">Prénom</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" name="first_name" id="first_name" required
+                            maxlength="32">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
+                        <span class="icon is-small is-right" id="status_first_name">
+
+                        </span>
+                    </div>
+                    <div id="helper_first_name">
+
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="last_name">Nom de famille</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input class="input" type="text" name="last_name" id="last_name" required
+                            maxlength="32">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
+                        <span class="icon is-small is-right" id="status_last_name">
+
+                        </span>
+                    </div>
+                    <div id="helper_last_name">
+
+                    </div>
+                </div>
+                <div class="field is-grouped" style="justify-content: center">
+                    <div class="control">
+                        <input type="submit" class="button is-primary" value="Ajouter">
+                    </div>
+                    <div class="control">
+                        <input type="reset" id="reset_form" class="button is-danger" value="Annuler">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="modal_user_creation_confirmation">
+        <div class="modal-background" id="modal_background"></div>
+
+        <div class="modal-content">
+            <div class="box" id="modal-box-content" style="text-align: center">
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let username_timeout = null;
+        let email_timeout = null;
+        let password_timeout = null;
+        let first_name_timeout = null;
+        let last_name_timeout = null;
+
+        document.getElementById('new_user').addEventListener('submit', function(event)
+        {
+            event.preventDefault();
+            if (!isCompleteForm())
+            {
+                return;
+            }
+            document.getElementById('modal_user_creation_confirmation').classList.add('is-active');
+            document.getElementById('modal-box-content').innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+            let request = new XMLHttpRequest();
+            let url = "/register";
+            let data = {};
+            data['username'] = document.getElementById('username').value;
+            data['email'] = document.getElementById('email').value;
+            data['password'] = document.getElementById('password').value;
+            data['first_name'] = document.getElementById('first_name').value;
+            data['last_name'] = document.getElementById('last_name').value;
+            request.open("POST", url);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.onreadystatechange = function()
+            {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200)
+                {
+                    let response = JSON.parse(this.responseText);
+                    let success_status = response['success_status'];
+                    let message = response['message'];
+                    let modal_box_content = response['user_data'];
+                    let modal_box_helper = response['errors'];
+                    set_modal_box_content(success_status, message, modal_box_content, modal_box_helper);
+                }
+            }
+            request.send(JSON.stringify(data));
+            resetForm();
+        })
+
+        function set_modal_box_content(success_status, message, modal_box_content, modal_box_helper)
+        {
+            let modal_box = document.getElementById('modal-box-content');
+            modal_box.innerHTML = '';
+
+            let modal_box_message = document.createElement('p');
+            modal_box_message.className = 'title is-4';
+            modal_box_message.classList.add(success_status ? 'has-text-success' : 'has-text-danger');
+            modal_box_message.innerHTML = message;
+
+            let modal_box_user_data = document.createElement('div');
+            modal_box_user_data.className = 'box';
+            let user_table = document.createElement('table');
+            user_table.className = 'table is-fullwidth';
+            for (let field of ['username', 'email', 'password','first_name', 'last_name'])
+            {
+                let user_table_row = document.createElement('tr');
+                let user_table_field = document.createElement('td');
+                user_table_field.innerHTML = field;
+                let user_table_value = document.createElement('td');
+                user_table_value.innerHTML = modal_box_content[field];
+                user_table_row.appendChild(user_table_field);
+                user_table_row.appendChild(user_table_value);
+                user_table.appendChild(user_table_row);
+            }
+            modal_box_user_data.appendChild(user_table);
+
+            modal_box.appendChild(modal_box_message);
+            modal_box.appendChild(modal_box_user_data);
+
+            for (let error in modal_box_helper || {})
+            {
+                let modal_box_helper_text = document.createElement('p');
+                modal_box_helper_text.className = 'help';
+                modal_box_helper_text.classList.add('is-danger');
+                modal_box_helper_text.innerHTML = error;
+                modal_box_user_data.appendChild(modal_box_helper_text);
+            }
+            let clipboard_button = document.createElement('button');
+            clipboard_button.className = 'button is-primary';
+            clipboard_button.innerHTML = 'Copier';
+            clipboard_button.addEventListener('click', function(event)
+            {
+                let user_data = '';
+                for (let field of ['username', 'email', 'password','first_name', 'last_name'])
+                {
+                    user_data += field + ': ' + modal_box_content[field] + '\n';
+                }
+                navigator.clipboard.writeText(user_data);
+            })
+            modal_box_user_data.appendChild(clipboard_button);
+        }
+
+        function resetForm()
+        {
+            let form = document.getElementById('new_user');
+            form.reset();
+            form.blur();
+            for (let field of ['username', 'email', 'password', 'first_name', 'last_name'])
+            {
+                document.getElementById(field).className = 'input';
+                document.getElementById('status_' + field).innerHTML = '';
+                document.getElementById('helper_' + field).innerHTML = '';
+            }
+            clearTimeout(username_timeout);
+            clearTimeout(email_timeout);
+            clearTimeout(password_timeout);
+            clearTimeout(first_name_timeout);
+            clearTimeout(last_name_timeout);
+        }
+
+        document.getElementById('reset_form').addEventListener('click', resetForm);
+
+        document.getElementById('username').addEventListener('input', function(event)
+        {
+            clearTimeout(username_timeout);
+            document.getElementById('status_username').innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'
+            username_timeout = setTimeout(function()
+            {
+                validateField('username');
+            }, 500);
+        })
+
+        document.getElementById('email').addEventListener('input', function(event)
+        {
+            clearTimeout(email_timeout);
+            document.getElementById('status_email').innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'
+            email_timeout = setTimeout(function()
+            {
+                validateField('email');
+            }, 500);
+        })
+
+        document.getElementById('password').addEventListener('input', function(event)
+        {
+            clearTimeout(password_timeout);
+            document.getElementById('status_password').innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'
+            password_timeout = setTimeout(function()
+            {
+                validateField('password');
+            }, 500);
+        })
+
+        document.getElementById('first_name').addEventListener('input', function(event)
+        {
+            clearTimeout(first_name_timeout);
+            document.getElementById('first_name').innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'
+            first_name_timeout = setTimeout(function()
+            {
+                validateField('first_name');
+            }, 500);
+        })
+
+        document.getElementById('last_name').addEventListener('input', function(event)
+        {
+            clearTimeout(last_name_timeout);
+            document.getElementById('last_name').innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'
+            last_name_timeout = setTimeout(function()
+            {
+                validateField('last_name');
+            }, 500);
+        })
+
+        document.getElementById('modal_background').addEventListener('click', function(event)
+        {
+            document.getElementById('modal_user_creation_confirmation').classList.remove('is-active');
+        })
+
+        function validateField(field)
+        {
+            let request = new XMLHttpRequest();
+            let url = "/user/validate_field";
+            let data = {};
+            data['field_value'] = document.getElementById(field).value
+            data['field_name'] = field;
+            request.open("POST", url);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.onreadystatechange = function()
+            {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200)
+                {
+                    let response = JSON.parse(this.responseText);
+                    let is_valid = response['is_valid'];
+                    let criteria = response['criteria']
+                    set_field_validation_status(field, is_valid, criteria);
+                }
+            }
+            request.send(JSON.stringify(data));
+        }
+
+        function set_field_validation_status(field, is_valid, criteria)
+        {
+            let status = document.getElementById('status_' + field);
+            let helper = document.getElementById('helper_' + field);
+            let input_field = document.getElementById(field);
+            if (is_valid)
+            {
+                input_field.className = 'input is-success';
+                status.innerHTML = '<i class="fas fa-check"></i>';
+            }
+            else
+            {
+                input_field.className = 'input is-danger';
+                status.innerHTML = '<i class="fas fa-times"></i>';
+            }
+            helper.innerHTML = '';
+            for (let criterion in criteria)
+            {
+                let helper_text = document.createElement('p');
+                helper_text.className = 'help';
+                helper_text.classList.add('is-' + (criteria[criterion] ? 'success' : 'danger'));
+                helper_text.innerHTML = criterion;
+                helper.appendChild(helper_text);
+            }
+        }
+
+        function isCompleteForm()
+        {
+            let fields = ['username', 'email', 'password', 'first_name', 'last_name'];
+            for (let field of fields)
+            {
+                let input_field = document.getElementById(field);
+                if (!input_field.hasAttribute('required') && input_field.value === '')
+                {
+                    continue;
+                }
+                if (input_field.className !== 'input is-success')
+                {
+                    input_field.focus();
+                    input_field.select();
+                    return false;
+                }
+            }
+            // If we get here, all fields are valid
+            return true;
+        }
+    </script>
 {% endblock %}

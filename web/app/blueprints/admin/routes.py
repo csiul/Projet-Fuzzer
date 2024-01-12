@@ -1,7 +1,7 @@
 """
 This module contains all routes related to admin pages and related processes
 """
-from flask import Blueprint, render_template, Response, make_response, request
+from flask import Blueprint, render_template, Response, make_response, request, jsonify
 from sqlalchemy.exc import IntegrityError
 from app.ext.sqlalchemy.model import User
 from app.ext.sqlalchemy.database import db
@@ -22,30 +22,38 @@ def register_route() -> Response:
     Secure page to register new users to the app.
     Requires admin privileges.
     """
-    form_errors = {
-        "add_user_error": None,
-    }
-
     if request.method == "POST":
-        if request.form.get("form_type") == "add_user":
-            try:
-                user = User(
-                    username=request.form.get("username"),
-                    email=request.form.get("email") if request.form.get("email") != "" else None,
-                    last_name=request.form.get("last_name"),
-                    first_name=request.form.get("first_name"),
-                    password=request.form.get("password"))
-                db.session.add(user)
-                db.session.commit()
-            except ValueError as e:
-                db.session.rollback()
-                form_errors["add_user_error"] = e.args[0]
-            except IntegrityError:
-                db.session.rollback()
-                form_errors["add_user_error"] = ("Le nom d'utilisateur ou le courriel est déjà pris",)
+        user_data_fields = ("username", "email", "last_name", "first_name", "password")
+        user_data = {field: request.json.get(field) for field in user_data_fields}
+        response = {}
+        if any([user_data[field] is None for field in user_data_fields]):
+            response['success_status'] = False
+            response['message'] = "Missing required fields"
+            response['user_data'] = user_data
+            return make_response(jsonify(response), 400)
+        try:
+            user = User(**user_data)
+            db.session.add(user)
+            db.session.commit()
+        except ValueError as e:
+            db.session.rollback()
+            response['success_status'] = False
+            response['message'] = "An error occurred while creating the user"
+            response['errors'] = e.args[0]
+            response['user_data'] = user_data
+            return make_response(jsonify(response), 200)
+        except IntegrityError:
+            db.session.rollback()
+            response['success_status'] = False
+            response['message'] = "Username or email already exists"
+            response['user_data'] = user_data
+            return make_response(jsonify(response), 200)
+        response['success_status'] = True
+        response['message'] = "User created successfully"
+        response['user_data'] = user_data
+        return make_response(jsonify(response), 200)
 
-    return make_response(render_template("admin/register.jinja2",
-                                         **form_errors))
+    return make_response(render_template("admin/register.jinja2"))
 
 
 @blueprint.route("/manage", methods=["GET", "POST"])
