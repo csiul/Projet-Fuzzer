@@ -26,7 +26,7 @@ def register_route() -> Response:
         user_data_fields = ("username", "email", "last_name", "first_name", "password")
         user_data = {field: request.json.get(field) for field in user_data_fields}
         response = {}
-        if any([user_data[field] is None for field in user_data_fields]):
+        if any(user_data[field] is None for field in user_data_fields):
             response['success_status'] = False
             response['message'] = "Missing required fields"
             response['user_data'] = user_data
