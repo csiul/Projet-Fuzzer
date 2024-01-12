@@ -23,7 +23,7 @@ services:
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock' # Accès à l'instance Docker
   db:
-    build: 'db'
+    build: mysql:8.0.35-debian
     volumes:
       - mysqldata:/var/lib/mysql
     environment:
@@ -69,7 +69,5 @@ secrets:
     file: secrets/db_password.txt
   db_root_password:
     file: secrets/db_root_password.txt
-  db_old_root_password:
-    file: secrets/db_old_root_password.txt
   app_admin:
     file: secrets/admin.json

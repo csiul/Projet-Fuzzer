@@ -23,9 +23,8 @@ FLASK_RUN_PORT=$flask_port
 """
 
 SECRETS_FOLDER = "secrets/"
-DB_ROOT_PASSWORD_FILE = "db_root_password.txt"
-DB_OLD_ROOT_PASSWORD_FILE = "db_old_root_password.txt"
-DB_PASSWORD_FILE = "db_password.txt"
+DB_ROOT_PASSWORD_FILE = "db_root_password"
+DB_PASSWORD_FILE = "db_password"
 
 
 def create_instance_config():
@@ -55,22 +54,19 @@ def generate_random_password(length: int = 20) -> str:
 def create_docker_secrets() -> None:
     filesystem.create_folder_if_not(SECRETS_FOLDER)
 
-    if filesystem.has_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}"):
-        click.echo("Updating %s" % DB_PASSWORD_FILE)
     # web db user password
-    filesystem.set_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}", generate_random_password(32))
-    click.echo(click.style("[x] created db user password for web container", fg="green", bold=True))
+    if filesystem.has_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}"):
+        click.echo(click.style("[] db user password for web container already exists", fg="green", bold=True))
+    else:
+        filesystem.set_file(f"{SECRETS_FOLDER}{DB_PASSWORD_FILE}", generate_random_password(32))
+        click.echo(click.style("[x] created db user password for web container", fg="green", bold=True))
 
-    if filesystem.has_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}"):
-        click.echo("Updating %s" % DB_ROOT_PASSWORD_FILE)
-        filesystem.set_file(f"{SECRETS_FOLDER}{DB_OLD_ROOT_PASSWORD_FILE}",
-                            filesystem.read_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}").readline())
     # db root password
-    filesystem.set_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}", generate_random_password(32))
-    click.echo(click.style("[x] created root password for db", fg="green", bold=True))
-    if not filesystem.has_file(f"{SECRETS_FOLDER}{DB_OLD_ROOT_PASSWORD_FILE}"):
-        filesystem.set_file(f"{SECRETS_FOLDER}{DB_OLD_ROOT_PASSWORD_FILE}",
-                            filesystem.read_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}").readline())
+    if filesystem.has_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}"):
+        click.echo(click.style("[] db root password already exists", fg="green", bold=True))
+    else:
+        filesystem.set_file(f"{SECRETS_FOLDER}{DB_ROOT_PASSWORD_FILE}", generate_random_password(32))
+        click.echo(click.style("[x] created root password for db", fg="green", bold=True))
 
 
 def create_dot_env() -> None:
@@ -130,7 +126,6 @@ def init_config() -> None:
     # docker secrets
     click.echo(click.style("*** Now creating necessary docker secrets ***", fg="green", bold=True))
     create_docker_secrets()
-
     create_app_admin()
 
     click.echo(click.style("All done. Now you can use 'flask run'", fg="green", bold=True))
