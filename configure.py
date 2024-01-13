@@ -23,8 +23,8 @@ FLASK_RUN_PORT=$flask_port
 """
 
 SECRETS_FOLDER = "secrets/"
-DB_ROOT_PASSWORD_FILE = "db_root_password"
-DB_PASSWORD_FILE = "db_password"
+DB_ROOT_PASSWORD_FILE = "db_root_password.txt"
+DB_PASSWORD_FILE = "db_password.txt"
 
 
 def create_instance_config():
