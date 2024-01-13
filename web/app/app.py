@@ -4,6 +4,7 @@ Utilitaires pour l'application
 """
 
 import os
+import urllib.parse
 
 from flask import Flask, request, redirect
 from flask_debugtoolbar import DebugToolbarExtension
@@ -50,6 +51,12 @@ def create_app() -> Flask:
     init_configuration(app)
 
     init_sentry(app)
+
+    with open("/run/secrets/db_password", encoding="utf-8") as f:
+        db_user = "web"
+        db_password = f.readline()
+        app.config["SQLALCHEMY_DATABASE_URI"] = \
+            f"mysql+pymysql://{db_user}:{urllib.parse.quote(db_password)}@db:3306/mysql_db"
 
     if len(app.config.get("SQLALCHEMY_DATABASE_URI")):
         init_database(app)

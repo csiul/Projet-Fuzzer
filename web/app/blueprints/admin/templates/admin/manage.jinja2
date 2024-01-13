@@ -1,0 +1,36 @@
+{% extends "layouts/main.jinja2" %}
+
+{% block meta %}
+    <meta name="description" content="Gestion des utilisateurs">
+    <title>Gestionnaire d'utilisateurs</title>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" action="/register" name="edit_users">
+        <h2>Modification des utilisateurs</h2>
+        <table>
+            <tr>
+                <th>Nom d'utilisateur</th>
+                <th>Courriel</th>
+                <th>Prénom</th>
+                <th>Nom de famille</th>
+                <th>Modifier</th>
+                <th>Supprimer</th>
+            </tr>
+            {% set counter = 0 %}
+            {% for user in users %}
+                <tr>
+                    <td><input type="text" name="username_{{ counter }}" id="username_{{ counter }}" value="{{ user.username }}"></td>
+                    <td><input type="text" name="email_{{ counter }}" id="email_{{ counter }}"
+                               value="{% if user.email != None %}{{ user.email }}{% endif %}"></td>
+                    <td><input type="text" name="first_name{{ counter }}" id="first_name{{ counter }}" value="{{ user.first_name }}"></td>
+                    <td><input type="text" name="last_name{{ counter }}" id="last_name{{ counter }}" value="{{ user.last_name }}"></td>
+                    <td><input type="button" value="modifier" id="edit_button_{{ counter }}"></td>
+                    <td><input type="button" value="supprimer" id="delete_button{{ counter }}"></td>
+                </tr>
+                {% set counter = counter + 1 %}
+            {% endfor %}
+        </table>
+        <input type="hidden" name="form_type" value="edit_user">
+    </form>
+{% endblock %}

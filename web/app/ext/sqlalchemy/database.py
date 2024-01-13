@@ -3,14 +3,10 @@ More on this stuff
 https://flask.palletsprojects.com/en/2.1.x/patterns/sqlalchemy/
 https://docs.sqlalchemy.org/en/14/orm/session_basics.html#session-getting
 """
+import json
 
 from flask import Flask
-from sqlalchemy import create_engine, Engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-
-
-# create empty session for future usage
-db_session: scoped_session = scoped_session(sessionmaker())
+from app.ext.sqlalchemy.model import db, User, Privilege
 
 
 def init_database(app: Flask) -> None:
@@ -18,19 +14,18 @@ def init_database(app: Flask) -> None:
     Initialise la base de données.
     :param app: Application Flask
     """
-    engine: Engine = create_engine(
-        app.config.get("SQLALCHEMY_DATABASE_URI"),
-        echo=app.config.get("SQLALCHEMY_ENGINE_ECHO")
-    )
-
-    db_session.configure(
-        bind=engine,
-        autocommit=app.config.get("SQLALCHEMY_AUTOCOMMIT"),
-        autoflush=app.config.get("SQLALCHEMY_AUTOFLUSH")
-    )
-
-    @app.teardown_appcontext
-    def shutdown_session() -> None:
-
-        # https://docs.sqlalchemy.org/en/14/orm/contextual.html#using-thread-local-scope-with-web-applications
-        db_session.remove()
+    db.init_app(app)
+    with app.app_context():
+        db.session.configure()
+        # Drop all tables. Only for development mode. If tables are altered in production, we should
+        # use migrations instead.
+        if not app.config.get('IS_PRODUCTION'):
+            db.drop_all()
+            db.create_all()
+            with open("/run/secrets/app_admin", encoding="utf-8") as f:
+                admin_info = json.load(f)
+                admin = User(**admin_info)
+                admin_privilege = Privilege(admin.uid, privilege="admin")
+                admin.privileges.append(admin_privilege)
+                db.session.add(admin)
+                db.session.commit()

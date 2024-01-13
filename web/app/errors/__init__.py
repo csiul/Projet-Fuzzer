@@ -13,5 +13,6 @@ def register_error_handlers(app: Flask) -> None:
     """
 
     @app.errorhandler(404)
-    def handle_error() -> str:
-        return render_template("error-pages/404.jinja2")
+    def handle_error(exception) -> str:
+        return render_template("error-pages/404.jinja2",
+                               exception=exception)

@@ -1,0 +1,52 @@
+{% extends "layouts/main.jinja2" %}
+
+{% block meta %}
+
+    <meta name="description" content="Page de connexion">
+    <title>Connexion</title>
+
+{% endblock %}
+
+{% block content %}
+    <div style="display: flex; align-items: center; justify-content: center;
+        height: 100vh;">
+        <form method="POST" action="/login">
+        <div class="box" style="display: flex; flex-direction: column">
+
+            <h1 class="title" style="text-align: center">Connexion</h1>
+
+            <div class="field">
+                <label class="label" for="username">Nom d'utilisateur</label>
+                <div class="control has-icons-left">
+                    <input class="input" type="text" id="username" name="username"  maxlength="32" required>
+                    <span class="icon is-small is-left">
+                        <i class="fas fa-user"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="password">Mot de passe</label>
+                <div class="control has-icons-left" style="text-align: center">
+                    <input class="input" type="password" id="password" name="password" maxlength="32" required>
+                    <span class="icon is-small is-left">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="field" style="text-align: center;">
+                <p class="control">
+                    <input class="button is-primary" type="submit" value="Se Connecter">
+                </p>
+            </div>
+            {% if error != None %}
+                <p class="help is-danger">
+                    {{ error }}
+                </p>
+            {% endif %}
+        </div>
+        </form>
+    </div>
+
+{% endblock %}
