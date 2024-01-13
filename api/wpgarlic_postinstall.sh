@@ -15,3 +15,6 @@ rm -r replacements
 # Create required structure
 cd ./wpgarlic/data
 mkdir scanned_results
+
+# Create the output.json file
+touch output.json
